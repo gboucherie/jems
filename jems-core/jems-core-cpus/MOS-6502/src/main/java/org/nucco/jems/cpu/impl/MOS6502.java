@@ -30,18 +30,18 @@ public class MOS6502 extends Abstract8BitsCPU
     };
 
     // 6502 status flags:
-    protected static final byte C_FLAG = 0x01; // 1: Carry occured
-    protected static final byte Z_FLAG = 0x02; // 1: Result is zero
-    protected static final byte I_FLAG = 0x04; // 1: Interrupts disabled
-    protected static final byte D_FLAG = 0x08; // 1: Decimal mode 
-    protected static final byte B_FLAG = 0x10; // Break [0 on stk after int]
-    protected static final byte V_FLAG = 0x40; // 1: Overflow occured
-    protected static final byte N_FLAG = -1; // 0x80; // 1: Result is negative
+    protected static final short C_FLAG = 0x01; // 1: Carry occured
+    protected static final short Z_FLAG = 0x02; // 1: Result is zero
+    protected static final short I_FLAG = 0x04; // 1: Interrupts disabled
+    protected static final short D_FLAG = 0x08; // 1: Decimal mode 
+    protected static final short B_FLAG = 0x10; // Break [0 on stk after int]
+    protected static final short V_FLAG = 0x40; // 1: Overflow occured
+    protected static final short N_FLAG = 0x80; // 1: Result is negative
 
     // =============================================================
     // Indicates which values are negative or zero
     // =============================================================
-    protected static final byte[] ZNTABLE = {
+    protected static final short[] ZNTABLE = {
         Z_FLAG, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -62,22 +62,22 @@ public class MOS6502 extends Abstract8BitsCPU
 
     private String CPUname = "MOS-6502";
 
-    protected byte A = 0x00; // accumulator
-    protected byte X = 0x00; // x register
-    protected byte Y = 0x00; // y register
-    protected byte SP = 0x00; // stack pointer
-    protected byte SR = 0x00; // processor status register
-    protected short PC = 0x0000; // program counter
+    protected short A = 0x00; // accumulator
+    protected short X = 0x00; // x register
+    protected short Y = 0x00; // y register
+    protected short SP = 0x00; // stack pointer
+    protected short SR = 0x00; // processor status register
+    protected int PC = 0x0000; // program counter
 
-    protected void step(byte opcode)
+    protected void step(short opcode)
     {
         switch (opcode)
         {
-            case   -9: Y = (byte) (Y - 1); setNZ(Y); break; // 0x88: DEY
-            case  -73: Y = (byte) (Y + 1); setNZ(Y); break; // 0xC8: INY
-            case  -75: X = (byte) (X - 1); setNZ(X); break; // 0xCA: DEX
-            case -105: X = (byte) (X + 1); setNZ(X); break; // 0xE8: INX
-            case -107: break;                               // 0xEA: NOP
+            case 0x88: Y = (short) ((Y - 1) & 0xFF); setNZ(Y); break; // DEY
+            case 0xC8: Y = (short) ((Y + 1) & 0xFF); setNZ(Y); break; // INY
+            case 0xCA: X = (short) ((X - 1) & 0xFF); setNZ(X); break; // DEX
+            case 0xE8: X = (short) ((X + 1) & 0xFF); setNZ(X); break; // INX
+            case 0xEA: break;                                         // NOP
 
             default:
                 illegal(opcode, PC, CPUname);
@@ -85,9 +85,9 @@ public class MOS6502 extends Abstract8BitsCPU
         }
     }
 
-    private void setNZ(byte value)
+    private void setNZ(short value)
     {
-        SR = (byte) ((SR & ~(Z_FLAG | N_FLAG)) | ZNTABLE[value * -1 + 127]);
+        SR = (short) ((SR & ~(Z_FLAG | N_FLAG)) | ZNTABLE[value]);
     }
 
 }

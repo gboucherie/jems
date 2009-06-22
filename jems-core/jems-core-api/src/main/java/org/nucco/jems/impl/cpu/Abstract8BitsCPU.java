@@ -10,9 +10,9 @@ public class Abstract8BitsCPU implements CPU
 
     private static final Logger LOG = LoggerFactory.getLogger(Abstract8BitsCPU.class);
 
-    protected void illegal(short opcode, int PC, String CPUName)
+    protected void illegal(short opcode, int PC, String cpuName)
     {
-        LOG.error(CPUName + ": Illegal opcode: " + Util.hex((byte) opcode) + " at " + Util.hex((short) (PC - 1)));
+        LOG.error(cpuName + ": Illegal opcode: " + Util.hex((byte) opcode) + " at " + Util.hex((short) (PC - 1)));
     }
 
 }

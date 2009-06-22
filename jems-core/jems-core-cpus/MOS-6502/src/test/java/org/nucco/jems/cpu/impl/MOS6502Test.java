@@ -9,6 +9,18 @@ public class MOS6502Test extends MOS6502
 {
 
     @Test
+    public void testIllegal()
+    {
+        short opcode = 0x03;
+        Assert.assertEquals(0, MOS6502.CYCLES[opcode]);
+        MOS6502 cpu = new MOS6502();
+        MOS6502State before = new MOS6502State(cpu);
+        cpu.step(opcode);
+        MOS6502State after = new MOS6502State(cpu);
+        Assert.assertEquals(before, after);
+    }
+
+    @Test
     public void testNOP()
     {
         short opcode = 0xEA;
@@ -34,7 +46,7 @@ public class MOS6502Test extends MOS6502
         // zero test
         expected = new MOS6502State((byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x02, (short) 0x0000);
         cpu = new MOS6502();
-        cpu.X = 0xFF;
+        cpu.x = 0xFF;
         cpu.step(opcode);
         after = new MOS6502State(cpu);
         Assert.assertEquals(expected, after);
@@ -42,7 +54,7 @@ public class MOS6502Test extends MOS6502
         // negative test
         expected = new MOS6502State((short) 0x00, (short) 0x80, (short) 0x00, (short) 0x00, (short) 0x80, (int) 0x0000);
         cpu = new MOS6502();
-        cpu.X = 0x7F;
+        cpu.x = 0x7F;
         cpu.step(opcode);
         after = new MOS6502State(cpu);
         Assert.assertEquals(expected, after);
@@ -54,7 +66,7 @@ public class MOS6502Test extends MOS6502
         short opcode = 0xCA;
         Assert.assertEquals(2, MOS6502.CYCLES[opcode]);
         MOS6502 cpu = new MOS6502();
-        cpu.X = 0x02;
+        cpu.x = 0x02;
         MOS6502State expected = new MOS6502State((short) 0x00, (short) 0x01, (short) 0x00, (short) 0x00, (short) 0x00, (int) 0x0000);
         cpu.step(opcode);
         MOS6502State after = new MOS6502State(cpu);
@@ -63,7 +75,7 @@ public class MOS6502Test extends MOS6502
         // zero test
         expected = new MOS6502State((short) 0x00, (short) 0x00, (short) 0x00, (short) 0x00, (short) 0x02, (int) 0x0000);
         cpu = new MOS6502();
-        cpu.X = 0x01;
+        cpu.x = 0x01;
         cpu.step(opcode);
         after = new MOS6502State(cpu);
         Assert.assertEquals(expected, after);
@@ -71,7 +83,7 @@ public class MOS6502Test extends MOS6502
         // negative test
         expected = new MOS6502State((short) 0x00, (short) 0xFF, (short) 0x00, (short) 0x00, (short) 0x80, (int) 0x0000);
         cpu = new MOS6502();
-        cpu.X = 0x00;
+        cpu.x = 0x00;
         cpu.step(opcode);
         after = new MOS6502State(cpu);
         Assert.assertEquals(expected, after);
@@ -91,7 +103,7 @@ public class MOS6502Test extends MOS6502
         // zero test
         expected = new MOS6502State((short) 0x00, (short) 0x00, (short) 0x00, (short) 0x00, (short) 0x02, (int) 0x0000);
         cpu = new MOS6502();
-        cpu.Y = (byte) 0xFF;
+        cpu.y = (byte) 0xFF;
         cpu.step(opcode);
         after = new MOS6502State(cpu);
         Assert.assertEquals(expected, after);
@@ -99,7 +111,7 @@ public class MOS6502Test extends MOS6502
         // negative test
         expected = new MOS6502State((short) 0x00, (short) 0x00, (short) 0x80, (short) 0x00, (short) 0x80, (int) 0x0000);
         cpu = new MOS6502();
-        cpu.Y = 0x7F;
+        cpu.y = 0x7F;
         cpu.step(opcode);
         after = new MOS6502State(cpu);
         Assert.assertEquals(expected, after);
@@ -111,7 +123,7 @@ public class MOS6502Test extends MOS6502
         short opcode = 0x88;
         Assert.assertEquals(2, MOS6502.CYCLES[opcode]);
         MOS6502 cpu = new MOS6502();
-        cpu.Y = 0x02;
+        cpu.y = 0x02;
         MOS6502State expected = new MOS6502State((short) 0x00, (short) 0x00, (short) 0x01, (short) 0x00, (short) 0x00, (int) 0x0000);
         cpu.step(opcode);
         MOS6502State after = new MOS6502State(cpu);
@@ -120,7 +132,7 @@ public class MOS6502Test extends MOS6502
         // zero test
         expected = new MOS6502State((short) 0x00, (short) 0x00, (short) 0x00, (short) 0x00, (short) 0x02, (int) 0x0000);
         cpu = new MOS6502();
-        cpu.Y = 0x01;
+        cpu.y = 0x01;
         cpu.step(opcode);
         after = new MOS6502State(cpu);
         Assert.assertEquals(expected, after);
@@ -128,7 +140,7 @@ public class MOS6502Test extends MOS6502
         // negative test
         expected = new MOS6502State((short) 0x00, (short) 0x00, (short) 0xFF, (short) 0x00, (short) 0x80, (int) 0x0000);
         cpu = new MOS6502();
-        cpu.Y = 0x00;
+        cpu.y = 0x00;
         cpu.step(opcode);
         after = new MOS6502State(cpu);
         Assert.assertEquals(expected, after);
@@ -146,12 +158,12 @@ public class MOS6502Test extends MOS6502
 
         public MOS6502State(MOS6502 cpu)
         {
-            A = cpu.A;
-            X = cpu.X;
-            Y = cpu.Y;
-            SP = cpu.SP;
-            SR = cpu.SR;
-            PC = cpu.PC;
+            A = cpu.a;
+            X = cpu.x;
+            Y = cpu.y;
+            SP = cpu.sp;
+            SR = cpu.sr;
+            PC = cpu.pc;
         }
 
         public MOS6502State(short A, short X, short Y, short SP, short SR, int PC)

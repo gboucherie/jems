@@ -60,34 +60,32 @@ public class MOS6502 extends Abstract8BitsCPU
         N_FLAG, N_FLAG, N_FLAG, N_FLAG, N_FLAG, N_FLAG, N_FLAG, N_FLAG, N_FLAG, N_FLAG, N_FLAG, N_FLAG, N_FLAG, N_FLAG, N_FLAG, N_FLAG
     };
 
-    private String CPUname = "MOS-6502";
+    private String cpuName = "MOS-6502";
 
-    protected short A = 0x00; // accumulator
-    protected short X = 0x00; // x register
-    protected short Y = 0x00; // y register
-    protected short SP = 0x00; // stack pointer
-    protected short SR = 0x00; // processor status register
-    protected int PC = 0x0000; // program counter
+    protected short a = 0x00; // accumulator
+    protected short x = 0x00; // x register
+    protected short y = 0x00; // y register
+    protected short sp = 0x00; // stack pointer
+    protected short sr = 0x00; // processor status register
+    protected int pc = 0x0000; // program counter
 
     protected void step(short opcode)
     {
         switch (opcode)
         {
-            case 0x88: Y = (short) ((Y - 1) & 0xFF); setNZ(Y); break; // DEY
-            case 0xC8: Y = (short) ((Y + 1) & 0xFF); setNZ(Y); break; // INY
-            case 0xCA: X = (short) ((X - 1) & 0xFF); setNZ(X); break; // DEX
-            case 0xE8: X = (short) ((X + 1) & 0xFF); setNZ(X); break; // INX
+            case 0x88: y = (short) ((y - 1) & 0xFF); setNZ(y); break; // DEY
+            case 0xC8: y = (short) ((y + 1) & 0xFF); setNZ(y); break; // INY
+            case 0xCA: x = (short) ((x - 1) & 0xFF); setNZ(x); break; // DEX
+            case 0xE8: x = (short) ((x + 1) & 0xFF); setNZ(x); break; // INX
             case 0xEA: break;                                         // NOP
 
-            default:
-                illegal(opcode, PC, CPUname);
-                break;
+            default: illegal(opcode, pc, cpuName); break;
         }
     }
 
     private void setNZ(short value)
     {
-        SR = (short) ((SR & ~(Z_FLAG | N_FLAG)) | ZNTABLE[value]);
+        sr = (short) ((sr & ~(Z_FLAG | N_FLAG)) | ZNTABLE[value]);
     }
 
 }

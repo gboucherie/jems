@@ -10,7 +10,7 @@ public class MOS6502 extends AbstractCPU
     // Timings for instructions. This is standard MC6502 T-States.
     // =============================================================
     protected static final byte[] CYCLES = {
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 00 .. 0F
+        7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 00 .. 0F
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 10 .. 1F
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 20 .. 2F
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 30 .. 3F
@@ -95,6 +95,12 @@ public class MOS6502 extends AbstractCPU
     {
         switch (opcode)
         {
+            case BRK:
+                pushShort(pc);
+                push((short) (sr | B_FLAG));
+                sr = (short) (sr | I_FLAG);
+                pc = readShort(0xFFFE);
+                break;
             case DEY:
                 y = (short) ((y - 1) & BYTE_MASK);
                 setNZ(y);
@@ -134,15 +140,27 @@ public class MOS6502 extends AbstractCPU
     }
 
     /*
-     * (non-Javadoc) Push a value on the stack and decrement the stack register.
+     * (non-Javadoc) Push a 8bits value on the stack and decrement one the stack
+     * register.
      * 
-     * @param value
-     *            the value to push on the stack
+     * @param value the 8bits value to push on the stack
      */
     private void push(short value)
     {
         memory.writeByte(0x0100 + sp, value);
         sp = (short) ((sp - 1) & BYTE_MASK);
+    }
+
+    /*
+     * (non-Javadoc) Push a 16bits value on the stack and decrement twice the
+     * stack
+     * 
+     * @param value the 16bits value to push on the stack
+     */
+    private void pushShort(int value)
+    {
+        push((short) (value >> 8));
+        push((short) value);
     }
 
     /*
@@ -158,7 +176,7 @@ public class MOS6502 extends AbstractCPU
 
     private int readShort(int address)
     {
-        return memory.readByte(address) + (memory.readByte((address + 1) & SHORT_MASK) << 8);
+        return memory.readByte(address) | (memory.readByte((address + 1) & SHORT_MASK) << 8);
     }
 
     public short getA()
@@ -207,6 +225,7 @@ public class MOS6502 extends AbstractCPU
         this.y = y;
     }
 
+    private static final short BRK = 0x00;
     private static final short DEY = 0x88;
     private static final short INY = 0xC8;
     private static final short DEX = 0xCA;

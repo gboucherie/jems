@@ -26,8 +26,8 @@
   		<scope>test</scope>
   	</dependency>
   	<dependency>
-  		<groupId>org.jmock</groupId>
-  		<artifactId>jmock-junit4</artifactId>
+  		<groupId>org.easymock</groupId>
+  		<artifactId>easymock</artifactId>
   		<scope>test</scope>
   	</dependency>
   </dependencies>

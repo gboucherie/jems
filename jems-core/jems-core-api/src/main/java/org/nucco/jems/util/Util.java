@@ -5,6 +5,17 @@ public class Util
 
     protected static final String HEX_CHARS = "0123456789ABCDEF";
 
+    private static final short FIRST_HEXA = 0xF0;
+    private static final short LAST_HEXA = 0x0F;
+
+    private static final byte SHIFT_4BITS = 4;
+    private static final byte SHIFT_8BITS = 8;
+    private static final byte SHIFT_16BITS = 16;
+
+    private Util()
+    {
+    }
+
     /**
      * Converts a byte to a Hexadecimal String.
      * 
@@ -14,7 +25,7 @@ public class Util
      */
     public static String hex(byte value)
     {
-        return "" + HEX_CHARS.charAt((value & 0xF0) >> 4) + HEX_CHARS.charAt(value & 0x0F);
+        return "" + HEX_CHARS.charAt((value & FIRST_HEXA) >> SHIFT_4BITS) + HEX_CHARS.charAt(value & LAST_HEXA);
     }
 
     /**
@@ -26,7 +37,7 @@ public class Util
      */
     public static String hex(short value)
     {
-        return hex((byte) (value >> 8)) + hex((byte) value);
+        return hex((byte) (value >> SHIFT_8BITS)) + hex((byte) value);
     }
 
     /**
@@ -38,7 +49,7 @@ public class Util
      */
     public static String hex(int value)
     {
-        return hex((short) (value >> 16)) + hex((short) value);
+        return hex((short) (value >> SHIFT_16BITS)) + hex((short) value);
     }
 
 }

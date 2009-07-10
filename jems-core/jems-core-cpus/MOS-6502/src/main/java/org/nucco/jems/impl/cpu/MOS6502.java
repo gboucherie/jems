@@ -2,9 +2,14 @@ package org.nucco.jems.impl.cpu;
 
 import org.nucco.jems.api.memory.Memory;
 import org.nucco.jems.impl.cpu.AbstractCPU;
+import org.nucco.jems.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MOS6502 extends AbstractCPU
 {
+
+    private static final Logger LOG = LoggerFactory.getLogger(MOS6502.class);
 
     // =============================================================
     // Timings for instructions. This is standard MC6502 T-States.
@@ -20,8 +25,8 @@ public class MOS6502 extends AbstractCPU
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 70 .. 7F
         0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, // 80 .. 8F
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 90 .. 9F
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // A0 .. AF
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // B0 .. BF
+        0, 6, 0, 0, 0, 3, 0, 0, 0, 2, 0, 0, 0, 4, 0, 0, // A0 .. AF
+        0, 5, 0, 0, 0, 4, 0, 0, 0, 4, 0, 0, 0, 4, 0, 0, // B0 .. BF
         0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 2, 0, 0, 0, 0, 0, // C0 .. CF
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // D0 .. DF
         0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 2, 0, 0, 0, 0, 0, // E0 .. EF
@@ -105,6 +110,38 @@ public class MOS6502 extends AbstractCPU
                 y = (short) ((y - 1) & BYTE_MASK);
                 setNZ(y);
                 break;
+            case LDA_IZX:
+                a = memory.readByte(indx());
+                setNZ(a);
+                break;
+            case LDA_ZP:
+                a = memory.readByte(fetch());
+                setNZ(a);
+                break;
+            case LDA_IMM:
+                a = fetch();
+                setNZ(a);
+                break;
+            case LDA_ABS:
+                a = memory.readByte(fetchShort());
+                setNZ(a);
+                break;
+            case LDA_IZY:
+                a = memory.readByte(indyrd());
+                setNZ(a);
+                break;
+            case LDA_ABY:
+                a = memory.readByte(absrd(y));
+                setNZ(a);
+                break;
+            case LDA_ABX:
+                a = memory.readByte(absrd(x));
+                setNZ(a);
+                break;
+            case LDA_ZPX:
+                a = memory.readByte((fetch() + x) & BYTE_MASK);
+                setNZ(a);
+                break;
             case INY:
                 y = (short) ((y + 1) & BYTE_MASK);
                 setNZ(y);
@@ -134,9 +171,22 @@ public class MOS6502 extends AbstractCPU
      */
     private short fetch()
     {
+//        LOG.debug(this.toString());
+
         short result = memory.readByte(pc);
         pc = (pc + 1) & SHORT_MASK;
         return result;
+    }
+
+    /*
+     * (non-Javadoc) Read two byte in memory at the address indicate by the pc
+     * and pc + 1 register and increment pc by 1 twice.
+     * 
+     * @return the bytes at the pc and pc + 1 address in memory
+     */
+    private int fetchShort()
+    {
+        return fetch() | fetch() << 8;
     }
 
     /*
@@ -172,6 +222,58 @@ public class MOS6502 extends AbstractCPU
     private void setNZ(short value)
     {
         sr = (short) ((sr & ~(Z_FLAG | N_FLAG)) | ZNTABLE[value]);
+    }
+
+    /*
+     * (non-Javadoc) Read an address begin at the pc, add x register to it and
+     * return. If the address plus the x register cross the address page it add
+     * one cycle.
+     * 
+     * @param offset the test value
+     * @return an address
+     */
+    private int absrd(short offset)
+    {
+        int address = fetchShort();
+        int result = (address + offset) & SHORT_MASK;
+        if ((address & 0xFF00) != (result & 0xFF00))
+        {
+            // TODO: add one cycle
+        }
+
+        return result;
+    }
+
+    /*
+     * (non-Javadoc) Implement the (inderect,x) addressing mode of MOS-6502
+     * processor.
+     * 
+     * @return an address
+     */
+    private int indx()
+    {
+        short zp = (short) ((fetch() + x) & BYTE_MASK);
+        return memory.readByte(zp) | (memory.readByte(zp + 1) & BYTE_MASK) << 8;
+    }
+
+    /*
+     * (non-Javadoc) Implement the (inderect,x) addressing mode of MOS-6502
+     * processor. Add on cycle if page crossed.
+     * 
+     * @return an address
+     */
+    private int indyrd()
+    {
+        int zp = fetch();
+        int address = memory.readByte(zp) | memory.readByte((zp + 1) & BYTE_MASK) << 8;
+        zp = address & 0xFF00;
+        address = (address + y) & SHORT_MASK;
+        if ((address & 0xFF00) != zp)
+        {
+            // TODO: add one cycle
+        }
+
+        return address;
     }
 
     private int readShort(int address)
@@ -225,8 +327,31 @@ public class MOS6502 extends AbstractCPU
         this.y = y;
     }
 
+    @Override
+    public String toString()
+    {   
+        StringBuilder result = new StringBuilder();
+        result.append("\nMOS-6502 current state:\n");
+        result.append("\taccumulator:\t\t" + Util.hex((byte) a) + "\n");
+        result.append("\tx register:\t\t" + Util.hex((byte) x) + "\n");
+        result.append("\ty register:\t\t" + Util.hex((byte) y) + "\n");
+        result.append("\tstack pointer:\t\t" + Util.hex((byte) sp) + "\n");
+        result.append("\tprocessor status:\t" + Util.hex((byte) sr) + "\n");
+        result.append("\tprogram counter:\t" + Util.hex((short) pc) + "\n");
+
+        return result.toString();
+    }
+
     private static final short BRK = 0x00;
     private static final short DEY = 0x88;
+    private static final short LDA_IZX = 0xA1;
+    private static final short LDA_ZP = 0xA5;
+    private static final short LDA_IMM = 0xA9;
+    private static final short LDA_ABS = 0xAD;
+    private static final short LDA_IZY = 0xB1;
+    private static final short LDA_ZPX = 0xB5;
+    private static final short LDA_ABY = 0xB9;
+    private static final short LDA_ABX = 0xBD;
     private static final short INY = 0xC8;
     private static final short DEX = 0xCA;
     private static final short INX = 0xE8;

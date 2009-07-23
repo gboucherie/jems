@@ -24,7 +24,7 @@ public class MOS6502 extends AbstractCPU
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 60 .. 6F
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 70 .. 7F
         0, 6, 0, 0, 3, 3, 3, 0, 2, 0, 2, 0, 4, 4, 4, 0, // 80 .. 8F
-        0, 6, 0, 0, 4, 4, 4, 0, 2, 5, 0, 0, 0, 5, 0, 0, // 90 .. 9F
+        0, 6, 0, 0, 4, 4, 4, 0, 2, 5, 2, 0, 0, 5, 0, 0, // 90 .. 9F
         2, 6, 2, 0, 3, 3, 3, 0, 2, 2, 2, 0, 4, 4, 4, 0, // A0 .. AF
         0, 5, 0, 0, 4, 4, 4, 0, 0, 4, 2, 0, 4, 4, 4, 0, // B0 .. BF
         0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 2, 0, 0, 0, 0, 0, // C0 .. CF
@@ -153,6 +153,9 @@ public class MOS6502 extends AbstractCPU
                 break;
             case STA_ABY:
                 memory.writeByte((fetchShort() + y) & SHORT_MASK, a);
+                break;
+            case TXS:
+                sp = x;
                 break;
             case STA_ABX:
                 memory.writeByte((fetchShort() + x) & SHORT_MASK, a);
@@ -482,6 +485,7 @@ public class MOS6502 extends AbstractCPU
     private static final short STX_ZPY = 0x96;
     private static final short TYA = 0x98;
     private static final short STA_ABY = 0x99;
+    private static final short TXS = 0x9A;
     private static final short STA_ABX = 0x9D;
     private static final short LDY_IMM = 0xA0;
     private static final short LDA_IZX = 0xA1;

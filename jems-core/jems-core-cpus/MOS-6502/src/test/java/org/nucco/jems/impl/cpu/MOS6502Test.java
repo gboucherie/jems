@@ -384,6 +384,20 @@ public class MOS6502Test
     }
 
     @Test
+    public void test_TXS()
+    {
+        Assert.assertEquals(2, MOS6502.CYCLES[0x9A]);
+        MOS6502State expected = new MOS6502State((short) 0xFF, (short) 0x13, (short) 0xFF, (short) 0x13, (short) 0xFF, (int) 0x0001);
+        cpu.setX((short) 0x13);
+        EasyMock.expect(memory.readByte(0x0000)).andReturn((short) 0x9A);
+        control.replay();
+        cpu.step();
+        control.verify();
+        MOS6502State after = new MOS6502State(cpu);
+        Assert.assertEquals(expected, after);
+    }
+
+    @Test
     public void test_STA_AbsoluteX()
     {
         Assert.assertEquals(5, MOS6502.CYCLES[0x9D]);

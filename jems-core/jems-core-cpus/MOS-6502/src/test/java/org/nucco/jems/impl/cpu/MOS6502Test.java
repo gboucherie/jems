@@ -1193,6 +1193,48 @@ public class MOS6502Test
     }
 
     @Test
+    public void test_TSX_Positive()
+    {
+        Assert.assertEquals(2, MOS6502.CYCLES[0xBA]);
+        MOS6502State expected = new MOS6502State((short) 0xFF, (short) 0x13, (short) 0xFF, (short) 0x13, (short) 0x7D, (int) 0x0001);
+        cpu.setSP((short) 0x13);
+        EasyMock.expect(memory.readByte(0x0000)).andReturn((short) 0xBA);
+        control.replay();
+        cpu.step();
+        control.verify();
+        MOS6502State after = new MOS6502State(cpu);
+        Assert.assertEquals(expected, after);
+    }
+
+    @Test
+    public void test_TSX_Zero()
+    {
+        Assert.assertEquals(2, MOS6502.CYCLES[0xBA]);
+        MOS6502State expected = new MOS6502State((short) 0xFF, (short) 0x00, (short) 0xFF, (short) 0x00, (short) 0x7F, (int) 0x0001);
+        cpu.setSP((short) 0x00);
+        EasyMock.expect(memory.readByte(0x0000)).andReturn((short) 0xBA);
+        control.replay();
+        cpu.step();
+        control.verify();
+        MOS6502State after = new MOS6502State(cpu);
+        Assert.assertEquals(expected, after);
+    }
+
+    @Test
+    public void test_TSX_Negative()
+    {
+        Assert.assertEquals(2, MOS6502.CYCLES[0xBA]);
+        MOS6502State expected = new MOS6502State((short) 0xFF, (short) 0xA1, (short) 0xFF, (short) 0xA1, (short) 0xFD, (int) 0x0001);
+        cpu.setSP((short) 0xA1);
+        EasyMock.expect(memory.readByte(0x0000)).andReturn((short) 0xBA);
+        control.replay();
+        cpu.step();
+        control.verify();
+        MOS6502State after = new MOS6502State(cpu);
+        Assert.assertEquals(expected, after);
+    }
+
+    @Test
     public void test_LDY_AbsoluteX_Positive()
     {
         Assert.assertEquals(4, MOS6502.CYCLES[0xBC]);

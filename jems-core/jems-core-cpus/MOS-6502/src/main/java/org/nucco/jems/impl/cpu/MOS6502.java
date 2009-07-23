@@ -26,7 +26,7 @@ public class MOS6502 extends AbstractCPU
         0, 6, 0, 0, 3, 3, 3, 0, 2, 0, 2, 0, 4, 4, 4, 0, // 80 .. 8F
         0, 6, 0, 0, 4, 4, 4, 0, 2, 5, 0, 0, 0, 5, 0, 0, // 90 .. 9F
         2, 6, 2, 0, 3, 3, 3, 0, 2, 2, 2, 0, 4, 4, 4, 0, // A0 .. AF
-        0, 5, 0, 0, 4, 4, 4, 0, 0, 4, 0, 0, 4, 4, 4, 0, // B0 .. BF
+        0, 5, 0, 0, 4, 4, 4, 0, 0, 4, 2, 0, 4, 4, 4, 0, // B0 .. BF
         0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 2, 0, 0, 0, 0, 0, // C0 .. CF
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // D0 .. DF
         0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 2, 0, 0, 0, 0, 0, // E0 .. EF
@@ -212,6 +212,10 @@ public class MOS6502 extends AbstractCPU
             case LDA_ABY:
                 a = memory.readByte(absrd(y));
                 setNZ(a);
+                break;
+            case TSX:
+                x = sp;
+                setNZ(x);
                 break;
             case LDY_ABX:
             	y = memory.readByte(absrd(x));
@@ -439,6 +443,14 @@ public class MOS6502 extends AbstractCPU
         this.y = y;
     }
 
+    /*
+     * (non-Javadoc) for unit test only
+     */
+    public void setSP(short sp)
+    {
+        this.sp = sp;
+    }
+
     @Override
     public String toString()
     {   
@@ -488,6 +500,7 @@ public class MOS6502 extends AbstractCPU
     private static final short LDA_ZPX = 0xB5;
     private static final short LDX_ZPY = 0xB6;
     private static final short LDA_ABY = 0xB9;
+    private static final short TSX = 0xBA;
     private static final short LDY_ABX = 0xBC;
     private static final short LDA_ABX = 0xBD;
     private static final short LDX_ABY = 0xBE;

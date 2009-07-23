@@ -23,9 +23,9 @@ public class MOS6502 extends AbstractCPU
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 50 .. 5F
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 60 .. 6F
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 70 .. 7F
-        0, 6, 0, 0, 3, 3, 3, 0, 2, 0, 0, 0, 4, 4, 4, 0, // 80 .. 8F
-        0, 6, 0, 0, 4, 4, 4, 0, 0, 5, 0, 0, 0, 5, 0, 0, // 90 .. 9F
-        2, 6, 2, 0, 3, 3, 3, 0, 0, 2, 0, 0, 4, 4, 4, 0, // A0 .. AF
+        0, 6, 0, 0, 3, 3, 3, 0, 2, 0, 2, 0, 4, 4, 4, 0, // 80 .. 8F
+        0, 6, 0, 0, 4, 4, 4, 0, 2, 5, 0, 0, 0, 5, 0, 0, // 90 .. 9F
+        2, 6, 2, 0, 3, 3, 3, 0, 2, 2, 2, 0, 4, 4, 4, 0, // A0 .. AF
         0, 5, 0, 0, 4, 4, 4, 0, 0, 4, 0, 0, 4, 4, 4, 0, // B0 .. BF
         0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 2, 0, 0, 0, 0, 0, // C0 .. CF
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // D0 .. DF
@@ -122,6 +122,10 @@ public class MOS6502 extends AbstractCPU
                 y = (short) ((y - 1) & BYTE_MASK);
                 setNZ(y);
                 break;
+            case TXA:
+                a = x;
+                setNZ(a);
+                break;
             case STY_ABS:
                 memory.writeByte(fetchShort(), y);
                 break;
@@ -142,6 +146,10 @@ public class MOS6502 extends AbstractCPU
                 break;
             case STX_ZPY:
                 memory.writeByte((fetch() + y) & BYTE_MASK, x);
+                break;
+            case TYA:
+                a = y;
+                setNZ(a);
                 break;
             case STA_ABY:
                 memory.writeByte((fetchShort() + y) & SHORT_MASK, a);
@@ -173,9 +181,17 @@ public class MOS6502 extends AbstractCPU
             	x = memory.readByte(fetch());
             	setNZ(x);
             	break;
+            case TAY:
+                y = a;
+                setNZ(y);
+                break;
             case LDA_IMM:
                 a = fetch();
                 setNZ(a);
+                break;
+            case TAX:
+                x = a;
+                setNZ(x);
                 break;
             case LDY_ABS:
             	y = memory.readByte(fetchShort());
@@ -402,6 +418,14 @@ public class MOS6502 extends AbstractCPU
     /*
      * (non-Javadoc) for unit test only
      */
+    public void setA(short a)
+    {
+        this.a = a;
+    }
+
+    /*
+     * (non-Javadoc) for unit test only
+     */
     public void setX(short x)
     {
         this.x = x;
@@ -436,6 +460,7 @@ public class MOS6502 extends AbstractCPU
     private static final short STA_ZP = 0x85;
     private static final short STX_ZP = 0x86;
     private static final short DEY = 0x88;
+    private static final short TXA = 0x8A;
     private static final short STY_ABS = 0x8C;
     private static final short STA_ABS = 0x8D;
     private static final short STX_ABS = 0x8E;
@@ -443,6 +468,7 @@ public class MOS6502 extends AbstractCPU
     private static final short STY_ZPX = 0x94;
     private static final short STA_ZPX = 0x95;
     private static final short STX_ZPY = 0x96;
+    private static final short TYA = 0x98;
     private static final short STA_ABY = 0x99;
     private static final short STA_ABX = 0x9D;
     private static final short LDY_IMM = 0xA0;
@@ -451,7 +477,9 @@ public class MOS6502 extends AbstractCPU
     private static final short LDY_ZP = 0xA4;
     private static final short LDA_ZP = 0xA5;
     private static final short LDX_ZP = 0xA6;
+    private static final short TAY = 0xA8;
     private static final short LDA_IMM = 0xA9;
+    private static final short TAX = 0xAA;
     private static final short LDY_ABS = 0xAC;
     private static final short LDA_ABS = 0xAD;
     private static final short LDX_ABS = 0xAE;

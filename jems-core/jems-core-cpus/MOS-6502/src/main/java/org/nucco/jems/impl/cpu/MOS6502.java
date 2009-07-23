@@ -23,8 +23,8 @@ public class MOS6502 extends AbstractCPU
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 50 .. 5F
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 60 .. 6F
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 70 .. 7F
-        0, 6, 0, 0, 0, 3, 3, 0, 2, 0, 0, 0, 0, 4, 4, 0, // 80 .. 8F
-        0, 6, 0, 0, 0, 4, 4, 0, 0, 5, 0, 0, 0, 5, 0, 0, // 90 .. 9F
+        0, 6, 0, 0, 3, 3, 3, 0, 2, 0, 0, 0, 4, 4, 4, 0, // 80 .. 8F
+        0, 6, 0, 0, 4, 4, 4, 0, 0, 5, 0, 0, 0, 5, 0, 0, // 90 .. 9F
         2, 6, 2, 0, 3, 3, 3, 0, 0, 2, 0, 0, 4, 4, 4, 0, // A0 .. AF
         0, 5, 0, 0, 4, 4, 4, 0, 0, 4, 0, 0, 4, 4, 4, 0, // B0 .. BF
         0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 2, 0, 0, 0, 0, 0, // C0 .. CF
@@ -109,6 +109,9 @@ public class MOS6502 extends AbstractCPU
             case STA_IZX:
                 memory.writeByte(indx(), a);
                 break;
+            case STY_ZP:
+                memory.writeByte(fetch(), y);
+                break;
             case STA_ZP:
                 memory.writeByte(fetch(), a);
                 break;
@@ -119,6 +122,9 @@ public class MOS6502 extends AbstractCPU
                 y = (short) ((y - 1) & BYTE_MASK);
                 setNZ(y);
                 break;
+            case STY_ABS:
+                memory.writeByte(fetchShort(), y);
+                break;
             case STA_ABS:
                 memory.writeByte(fetchShort(), a);
                 break;
@@ -127,6 +133,9 @@ public class MOS6502 extends AbstractCPU
                 break;
             case STA_IZY:
                 memory.writeByte(indywr(), a);
+                break;
+            case STY_ZPX:
+                memory.writeByte((fetch() + x) & BYTE_MASK, y);
                 break;
             case STA_ZPX:
                 memory.writeByte((fetch() + x) & BYTE_MASK, a);
@@ -423,12 +432,15 @@ public class MOS6502 extends AbstractCPU
 
     private static final short BRK = 0x00;
     private static final short STA_IZX = 0x81;
+    private static final short STY_ZP = 0x84;
     private static final short STA_ZP = 0x85;
     private static final short STX_ZP = 0x86;
     private static final short DEY = 0x88;
+    private static final short STY_ABS = 0x8C;
     private static final short STA_ABS = 0x8D;
     private static final short STX_ABS = 0x8E;
     private static final short STA_IZY = 0x91;
+    private static final short STY_ZPX = 0x94;
     private static final short STA_ZPX = 0x95;
     private static final short STX_ZPY = 0x96;
     private static final short STA_ABY = 0x99;

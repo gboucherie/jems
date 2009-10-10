@@ -19,7 +19,7 @@ public class MOS6502 extends AbstractCPU
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 10 .. 1F
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 20 .. 2F
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 30 .. 3F
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 40 .. 4F
+        0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, // 40 .. 4F
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 50 .. 5F
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 60 .. 6F
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 70 .. 7F
@@ -105,6 +105,9 @@ public class MOS6502 extends AbstractCPU
                 push((short) (sr | B_FLAG));
                 sr = (short) (sr | I_FLAG);
                 pc = readShort(0xFFFE);
+                break;
+            case PHA:
+                push(a);
                 break;
             case STA_IZX:
                 memory.writeByte(indx(), a);
@@ -470,6 +473,7 @@ public class MOS6502 extends AbstractCPU
     }
 
     private static final short BRK = 0x00;
+    private static final short PHA = 0x48;
     private static final short STA_IZX = 0x81;
     private static final short STY_ZP = 0x84;
     private static final short STA_ZP = 0x85;

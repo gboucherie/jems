@@ -64,6 +64,21 @@ public class MOS6502Test
     }
 
     @Test
+    public void test_PHA()
+    {
+        Assert.assertEquals(3, MOS6502.CYCLES[0x48]);
+        MOS6502State expected = new MOS6502State((short) 0x58, (short) 0xFF, (short) 0xFF, (short) 0xFE, (short) 0xFF, (int) 0x0001);
+        cpu.setA((short) 0x58);
+        EasyMock.expect(memory.readByte(0x0000)).andReturn((short) 0x48);
+        memory.writeByte(0x01FF, (short) 0x58);
+        control.replay();
+        cpu.step();
+        control.verify();
+        MOS6502State result = new MOS6502State(cpu);
+        Assert.assertEquals(expected, result);
+    }
+
+    @Test
     public void test_STA_IndirectX()
     {
         Assert.assertEquals(6, MOS6502.CYCLES[0x81]);

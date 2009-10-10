@@ -15,7 +15,7 @@ public class MOS6502 extends AbstractCPU
     // Timings for instructions. This is standard MC6502 T-States.
     // =============================================================
     protected static final byte[] CYCLES = {
-        7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 00 .. 0F
+        7, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, // 00 .. 0F
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 10 .. 1F
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 20 .. 2F
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 30 .. 3F
@@ -105,6 +105,9 @@ public class MOS6502 extends AbstractCPU
                 push((short) (sr | B_FLAG));
                 sr = (short) (sr | I_FLAG);
                 pc = readShort(0xFFFE);
+                break;
+            case PHP:
+                push(sr);
                 break;
             case PHA:
                 push(a);
@@ -457,6 +460,14 @@ public class MOS6502 extends AbstractCPU
         this.sp = sp;
     }
 
+    /*
+     * (non-Javadoc) for unit test only
+     */
+    public void setSR(short sr)
+    {
+        this.sr = sr;
+    }
+
     @Override
     public String toString()
     {   
@@ -473,6 +484,7 @@ public class MOS6502 extends AbstractCPU
     }
 
     private static final short BRK = 0x00;
+    private static final short PHP = 0x08;
     private static final short PHA = 0x48;
     private static final short STA_IZX = 0x81;
     private static final short STY_ZP = 0x84;

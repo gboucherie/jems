@@ -79,6 +79,21 @@ public class MOS6502Test
     }
 
     @Test
+    public void test_PLP()
+    {
+        Assert.assertEquals(4, MOS6502.CYCLES[0x28]);
+        MOS6502State expected = new MOS6502State((short) 0xFF, (short) 0xFF, (short) 0xFF, (short) 0x59, (short) 0x67, (int) 0x0001);
+        cpu.setSP((short) 0x58);
+        EasyMock.expect(memory.readByte(0x0000)).andReturn((short) 0x28);
+        EasyMock.expect(memory.readByte(0x0158)).andReturn((short) 0x67);
+        control.replay();
+        cpu.step();
+        control.verify();
+        MOS6502State result = new MOS6502State(cpu);
+        Assert.assertEquals(expected, result);
+    }
+
+    @Test
     public void test_PHA()
     {
         Assert.assertEquals(3, MOS6502.CYCLES[0x48]);

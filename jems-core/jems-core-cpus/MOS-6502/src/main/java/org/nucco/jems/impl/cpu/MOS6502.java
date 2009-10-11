@@ -17,7 +17,7 @@ public class MOS6502 extends AbstractCPU
     protected static final byte[] CYCLES = {
         7, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, // 00 .. 0F
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 10 .. 1F
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 20 .. 2F
+        0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, // 20 .. 2F
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 30 .. 3F
         0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, // 40 .. 4F
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 50 .. 5F
@@ -108,6 +108,9 @@ public class MOS6502 extends AbstractCPU
                 break;
             case PHP:
                 push(sr);
+                break;
+            case PLP:
+                sr = pop();
                 break;
             case PHA:
                 push(a);
@@ -502,6 +505,7 @@ public class MOS6502 extends AbstractCPU
 
     private static final short BRK = 0x00;
     private static final short PHP = 0x08;
+    private static final short PLP = 0x28;
     private static final short PHA = 0x48;
     private static final short PLA = 0x68;
     private static final short STA_IZX = 0x81;

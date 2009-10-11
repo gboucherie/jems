@@ -15,8 +15,8 @@ public class MOS6502 extends AbstractCPU
     // Timings for instructions. This is standard MC6502 T-States.
     // =============================================================
     protected static final byte[] CYCLES = {
-        7, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, // 00 .. 0F
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 10 .. 1F
+        7, 6, 0, 0, 0, 3, 0, 0, 3, 2, 0, 0, 0, 4, 0, 0, // 00 .. 0F
+        0, 5, 0, 0, 0, 4, 0, 0, 0, 4, 0, 0, 0, 4, 0, 0, // 10 .. 1F
         0, 6, 0, 0, 0, 3, 0, 0, 4, 2, 0, 0, 0, 4, 0, 0, // 20 .. 2F
         0, 5, 0, 0, 0, 4, 0, 0, 0, 4, 0, 0, 0, 4, 0, 0, // 30 .. 3F
         0, 6, 0, 0, 0, 3, 0, 0, 3, 2, 0, 0, 0, 4, 0, 0, // 40 .. 4F
@@ -106,8 +106,32 @@ public class MOS6502 extends AbstractCPU
                 sr = (short) (sr | I_FLAG);
                 pc = readShort(0xFFFE);
                 break;
+            case ORA_IZX:
+                setNZ(a |= memory.readByte(indx()));
+                break;
+            case ORA_ZP:
+                setNZ(a |= memory.readByte(fetch()));
+                break;
             case PHP:
                 push(sr);
+                break;
+            case ORA_IMM:
+                setNZ(a |= fetch());
+                break;
+            case ORA_ABS:
+                setNZ(a |= memory.readByte(fetchShort()));
+                break;
+            case ORA_IZY:
+                setNZ(a |= memory.readByte(indyrd()));
+                break;
+            case ORA_ZPX:
+                setNZ(a |= memory.readByte(fetch() + x) & BYTE_MASK);
+                break;
+            case ORA_ABY:
+                setNZ(a |= memory.readByte(absrd(y)));
+                break;
+            case ORA_ABX:
+                setNZ(a |= memory.readByte(absrd(x)));
                 break;
             case AND_IZX:
                 setNZ(a &= memory.readByte(indx()));
@@ -638,6 +662,15 @@ public class MOS6502 extends AbstractCPU
     private static final short EOR_ABY = 0x59;
     private static final short EOR_IZX = 0x41;
     private static final short EOR_IZY = 0x51;
+
+    private static final short ORA_IMM = 0x09;
+    private static final short ORA_ZP = 0x05;
+    private static final short ORA_ZPX = 0x15;
+    private static final short ORA_ABS = 0x0D;
+    private static final short ORA_ABX = 0x1D;
+    private static final short ORA_ABY = 0x19;
+    private static final short ORA_IZX = 0x01;
+    private static final short ORA_IZY = 0x11;
 
 
     // Increments & Decrements

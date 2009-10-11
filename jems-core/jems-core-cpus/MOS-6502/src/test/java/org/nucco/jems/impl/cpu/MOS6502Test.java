@@ -29,6 +29,54 @@ public class MOS6502Test extends AbstractMOS6502Test
     }
 
     @Test
+    public void test_ORA_IndirectX_Positive()
+    {
+        MOS6502State expected = new MOS6502State((short) 0x5F, (short) 0xFF, (short) 0xFF, (short) 0xFF, (short) 0x7D, (int) 0x0002);
+        cpu.setA((short) 0x4F);
+        test_IndirectX_read((short) 0x01, (byte) 6, expected, (short) 0x10);
+    }
+
+    @Test
+    public void test_ORA_IndirectX_Zero()
+    {
+        MOS6502State expected = new MOS6502State((short) 0x00, (short) 0xFF, (short) 0xFF, (short) 0xFF, (short) 0x7F, (int) 0x0002);
+        cpu.setA((short) 0x00);
+        test_IndirectX_read((short) 0x01, (byte) 6, expected, (short) 0x00);
+    }
+
+    @Test
+    public void test_ORA_IndirectX_Negative()
+    {
+        MOS6502State expected = new MOS6502State((short) 0xDB, (short) 0xFF, (short) 0xFF, (short) 0xFF, (short) 0xFD, (int) 0x0002);
+        cpu.setA((short) 0xD3);
+        test_IndirectX_read((short) 0x01, (byte) 6, expected, (short) 0x98);
+    }
+
+    @Test
+    public void test_ORA_ZeroPage_Positive()
+    {
+        MOS6502State expected = new MOS6502State((short) 0x5F, (short) 0xFF, (short) 0xFF, (short) 0xFF, (short) 0x7D, (int) 0x0002);
+        cpu.setA((short) 0x4F);
+        test_ZeroPage_read((short) 0x05, (byte) 3, expected, (short) 0x10);
+    }
+
+    @Test
+    public void test_ORA_ZeroPage_Zero()
+    {
+        MOS6502State expected = new MOS6502State((short) 0x00, (short) 0xFF, (short) 0xFF, (short) 0xFF, (short) 0x7F, (int) 0x0002);
+        cpu.setA((short) 0x00);
+        test_ZeroPage_read((short) 0x05, (byte) 3, expected, (short) 0x00);
+    }
+
+    @Test
+    public void test_ORA_ZeroPage_Negative()
+    {
+        MOS6502State expected = new MOS6502State((short) 0xDB, (short) 0xFF, (short) 0xFF, (short) 0xFF, (short) 0xFD, (int) 0x0002);
+        cpu.setA((short) 0x98);
+        test_ZeroPage_read((short) 0x05, (byte) 3, expected, (short) 0xD3);
+    }
+
+    @Test
     public void test_PHP()
     {
         MOS6502State expected = new MOS6502State((short) 0xFF, (short) 0xFF, (short) 0xFF, (short) 0xFE, (short) 0x58, (int) 0x0001);
@@ -36,6 +84,150 @@ public class MOS6502Test extends AbstractMOS6502Test
         EasyMock.expect(memory.readByte(0x0000)).andReturn((short) 0x08);
         memory.writeByte(0x01FF, (short) 0x58);
         test((short) 0x08, (byte) 3, expected);
+    }
+
+    @Test
+    public void test_ORA_Immediate_Positive()
+    {
+        MOS6502State expected = new MOS6502State((short) 0x5F, (short) 0xFF, (short) 0xFF, (short) 0xFF, (short) 0x7D, (int) 0x0002);
+        cpu.setA((short) 0x4F);
+        test_Immediate_read((short) 0x09, (byte) 2, expected, (short) 0x10);
+    }
+
+    @Test
+    public void test_ORA_Immediate_Zero()
+    {
+        MOS6502State expected = new MOS6502State((short) 0x00, (short) 0xFF, (short) 0xFF, (short) 0xFF, (short) 0x7F, (int) 0x0002);
+        cpu.setA((short) 0x00);
+        test_Immediate_read((short) 0x09, (byte) 2, expected, (short) 0x00);
+    }
+
+    @Test
+    public void test_ORA_Immediate_Negative()
+    {
+        MOS6502State expected = new MOS6502State((short) 0xDB, (short) 0xFF, (short) 0xFF, (short) 0xFF, (short) 0xFD, (int) 0x0002);
+        cpu.setA((short) 0xD3);
+        test_Immediate_read((short) 0x09, (byte) 2, expected, (short) 0x98);
+    }
+
+    @Test
+    public void test_ORA_Absolute_Positive()
+    {
+        MOS6502State expected = new MOS6502State((short) 0x5F, (short) 0xFF, (short) 0xFF, (short) 0xFF, (short) 0x7D, (int) 0x0003);
+        cpu.setA((short) 0x4F);
+        test_Absolute_read((short) 0x0D, (byte) 4, expected, (short) 0x10);
+    }
+
+    @Test
+    public void test_ORA_Absolute_Zero()
+    {
+        MOS6502State expected = new MOS6502State((short) 0x00, (short) 0xFF, (short) 0xFF, (short) 0xFF, (short) 0x7F, (int) 0x0003);
+        cpu.setA((short) 0x00);
+        test_Absolute_read((short) 0x0D, (byte) 4, expected, (short) 0x00);
+    }
+
+    @Test
+    public void test_ORA_Absolute_Negative()
+    {
+        MOS6502State expected = new MOS6502State((short) 0xDB, (short) 0xFF, (short) 0xFF, (short) 0xFF, (short) 0xFD, (int) 0x0003);
+        cpu.setA((short) 0xD3);
+        test_Absolute_read((short) 0x0D, (byte) 4, expected, (short) 0x98);
+    }
+
+    @Test
+    public void test_ORA_IndirectY_Positive()
+    {
+        MOS6502State expected = new MOS6502State((short) 0x5F, (short) 0xFF, (short) 0xFF, (short) 0xFF, (short) 0x7D, (int) 0x0002);
+        cpu.setA((short) 0x4F);
+        test_IndirectY_read((short) 0x11, (byte) 5, expected, (short) 0x10);
+    }
+
+    @Test
+    public void test_ORA_IndirectY_Zero()
+    {
+        MOS6502State expected = new MOS6502State((short) 0x00, (short) 0xFF, (short) 0xFF, (short) 0xFF, (short) 0x7F, (int) 0x0002);
+        cpu.setA((short) 0x00);
+        test_IndirectY_read((short) 0x11, (byte) 5, expected, (short) 0x00);
+    }
+
+    @Test
+    public void test_ORA_IndirectY_Negative()
+    {
+        MOS6502State expected = new MOS6502State((short) 0xDB, (short) 0xFF, (short) 0xFF, (short) 0xFF, (short) 0xFD, (int) 0x0002);
+        cpu.setA((short) 0xD3);
+        test_IndirectY_read((short) 0x11, (byte) 5, expected, (short) 0x98);
+    }
+
+    @Test
+    public void test_ORA_ZeroPageX_Positive()
+    {
+        MOS6502State expected = new MOS6502State((short) 0x5F, (short) 0x08, (short) 0xFF, (short) 0xFF, (short) 0x7D, (int) 0x0002);
+        cpu.setA((short) 0x4F);
+        test_ZeroPageX_read((short) 0x15, (byte) 4, expected, (short) 0x10);
+    }
+
+    @Test
+    public void test_ORA_ZeroPageX_Zero()
+    {
+        MOS6502State expected = new MOS6502State((short) 0x00, (short) 0x08, (short) 0xFF, (short) 0xFF, (short) 0x7F, (int) 0x0002);
+        cpu.setA((short) 0x00);
+        test_ZeroPageX_read((short) 0x15, (byte) 4, expected, (short) 0x00);
+    }
+
+    @Test
+    public void test_ORA_ZeroPageX_Negative()
+    {
+        MOS6502State expected = new MOS6502State((short) 0xDB, (short) 0x08, (short) 0xFF, (short) 0xFF, (short) 0xFD, (int) 0x0002);
+        cpu.setA((short) 0xD3);
+        test_ZeroPageX_read((short) 0x15, (byte) 4, expected, (short) 0x98);
+    }
+
+    @Test
+    public void test_ORA_AbsoluteY_Positive()
+    {
+        MOS6502State expected = new MOS6502State((short) 0x5F, (short) 0xFF, (short) 0xFF, (short) 0xFF, (short) 0x7D, (int) 0x0003);
+        cpu.setA((short) 0x4F);
+        test_AbsoluteY_read((short) 0x19, (byte) 4, expected, (short) 0x10);
+    }
+
+    @Test
+    public void test_ORA_AbsoluteY_Zero()
+    {
+        MOS6502State expected = new MOS6502State((short) 0x00, (short) 0xFF, (short) 0xFF, (short) 0xFF, (short) 0x7F, (int) 0x0003);
+        cpu.setA((short) 0x00);
+        test_AbsoluteY_read((short) 0x19, (byte) 4, expected, (short) 0x00);
+    }
+
+    @Test
+    public void test_ORA_AbsoluteY_Negative()
+    {
+        MOS6502State expected = new MOS6502State((short) 0xDB, (short) 0xFF, (short) 0xFF, (short) 0xFF, (short) 0xFD, (int) 0x0003);
+        cpu.setA((short) 0xD3);
+        test_AbsoluteY_read((short) 0x19, (byte) 4, expected, (short) 0x98);
+    }
+
+    @Test
+    public void test_ORA_AbsoluteX_Positive()
+    {
+        MOS6502State expected = new MOS6502State((short) 0x5F, (short) 0x01, (short) 0xFF, (short) 0xFF, (short) 0x7D, (int) 0x0003);
+        cpu.setA((short) 0x4F);
+        test_AbsoluteX_read((short) 0x1D, (byte) 4, expected, (short) 0x10);
+    }
+
+    @Test
+    public void test_ORA_AbsoluteX_Zero()
+    {
+        MOS6502State expected = new MOS6502State((short) 0x00, (short) 0x01, (short) 0xFF, (short) 0xFF, (short) 0x7F, (int) 0x0003);
+        cpu.setA((short) 0x00);
+        test_AbsoluteX_read((short) 0x1D, (byte) 4, expected, (short) 0x00);
+    }
+
+    @Test
+    public void test_ORA_AbsoluteX_Negative()
+    {
+        MOS6502State expected = new MOS6502State((short) 0xDB, (short) 0x01, (short) 0xFF, (short) 0xFF, (short) 0xFD, (int) 0x0003);
+        cpu.setA((short) 0xD3);
+        test_AbsoluteX_read((short) 0x1D, (byte) 4, expected, (short) 0x98);
     }
 
     @Test

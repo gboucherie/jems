@@ -17,8 +17,8 @@ public class MOS6502 extends AbstractCPU
     protected static final byte[] CYCLES = {
         7, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, // 00 .. 0F
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 10 .. 1F
-        0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, // 20 .. 2F
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 30 .. 3F
+        0, 6, 0, 0, 0, 3, 0, 0, 4, 2, 0, 0, 0, 4, 0, 0, // 20 .. 2F
+        0, 5, 0, 0, 0, 4, 0, 0, 0, 4, 0, 0, 0, 4, 0, 0, // 30 .. 3F
         0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, // 40 .. 4F
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 50 .. 5F
         0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, // 60 .. 6F
@@ -109,8 +109,32 @@ public class MOS6502 extends AbstractCPU
             case PHP:
                 push(sr);
                 break;
+            case AND_IZX:
+                setNZ(a &= memory.readByte(indx()));
+                break;
+            case AND_ZP:
+                setNZ(a &= memory.readByte(fetch()));
+                break;
             case PLP:
                 sr = pop();
+                break;
+            case AND_IMM:
+                setNZ(a &= fetch());
+                break;
+            case AND_ABS:
+                setNZ(a &= memory.readByte(fetchShort()));
+                break;
+            case AND_IZY:
+                setNZ(a &= memory.readByte(indyrd()));
+                break;
+            case AND_ZPX:
+                setNZ(a &= memory.readByte((fetch() + x) & BYTE_MASK));
+                break;
+            case AND_ABY:
+                setNZ(a &= memory.readByte(absrd(y)));
+                break;
+            case AND_ABX:
+                setNZ(a &= memory.readByte(absrd(x)));
                 break;
             case PHA:
                 push(a);
@@ -174,29 +198,29 @@ public class MOS6502 extends AbstractCPU
                 memory.writeByte((fetchShort() + x) & SHORT_MASK, a);
                 break;
             case LDY_IMM:
-            	y = fetch();
-            	setNZ(y);
-            	break;
+                y = fetch();
+                setNZ(y);
+                break;
             case LDA_IZX:
                 a = memory.readByte(indx());
                 setNZ(a);
                 break;
             case LDX_IMM:
-            	x = fetch();
-            	setNZ(x);
-            	break;
+                x = fetch();
+                setNZ(x);
+                break;
             case LDY_ZP:
-            	y = memory.readByte(fetch());
-            	setNZ(y);
-            	break;
+                y = memory.readByte(fetch());
+                setNZ(y);
+                break;
             case LDA_ZP:
                 a = memory.readByte(fetch());
                 setNZ(a);
                 break;
             case LDX_ZP:
-            	x = memory.readByte(fetch());
-            	setNZ(x);
-            	break;
+                x = memory.readByte(fetch());
+                setNZ(x);
+                break;
             case TAY:
                 y = a;
                 setNZ(y);
@@ -210,17 +234,17 @@ public class MOS6502 extends AbstractCPU
                 setNZ(x);
                 break;
             case LDY_ABS:
-            	y = memory.readByte(fetchShort());
-            	setNZ(y);
+                y = memory.readByte(fetchShort());
+                setNZ(y);
                 break;
             case LDA_ABS:
                 a = memory.readByte(fetchShort());
                 setNZ(a);
                 break;
             case LDX_ABS:
-            	x = memory.readByte(fetchShort());
-            	setNZ(x);
-            	break;
+                x = memory.readByte(fetchShort());
+                setNZ(x);
+                break;
             case LDA_IZY:
                 a = memory.readByte(indyrd());
                 setNZ(a);
@@ -234,29 +258,29 @@ public class MOS6502 extends AbstractCPU
                 setNZ(x);
                 break;
             case LDY_ABX:
-            	y = memory.readByte(absrd(x));
-            	setNZ(y);
+                y = memory.readByte(absrd(x));
+                setNZ(y);
                 break;
             case LDA_ABX:
                 a = memory.readByte(absrd(x));
                 setNZ(a);
                 break;
             case LDX_ABY:
-            	x = memory.readByte(absrd(y));
-            	setNZ(x);
-            	break;
+                x = memory.readByte(absrd(y));
+                setNZ(x);
+                break;
             case LDY_ZPX:
-            	y = memory.readByte((fetch() + x) & BYTE_MASK);
-            	setNZ(y);
-            	break;
+                y = memory.readByte((fetch() + x) & BYTE_MASK);
+                setNZ(y);
+                break;
             case LDA_ZPX:
                 a = memory.readByte((fetch() + x) & BYTE_MASK);
                 setNZ(a);
                 break;
             case LDX_ZPY:
-            	x = memory.readByte((fetch() + y) & BYTE_MASK);
-            	setNZ(x);
-            	break;
+                x = memory.readByte((fetch() + y) & BYTE_MASK);
+                setNZ(x);
+                break;
             case INY:
                 y = (short) ((y + 1) & BYTE_MASK);
                 setNZ(y);
@@ -354,9 +378,9 @@ public class MOS6502 extends AbstractCPU
 
     /*
      * (non-Javadoc) Construct and absolute address with two first bytes in pc
-     * and x to it. Add one cycle if page cross.
+     * and offset to it. Add one cycle if page cross.
      * 
-     * @param offset the test value
+     * @param offset the value to add at the address
      * 
      * @return an address
      */
@@ -385,7 +409,7 @@ public class MOS6502 extends AbstractCPU
     }
 
     /*
-     * (non-Javadoc) Implement the (inderect,x) addressing mode of MOS-6502
+     * (non-Javadoc) Implement the (inderect),y addressing mode of MOS-6502
      * processor. Add on cycle if page crossed.
      * 
      * @return an address
@@ -404,6 +428,12 @@ public class MOS6502 extends AbstractCPU
         return address;
     }
 
+    /*
+     * (non-Javadoc) Implement the (inderect),y addressing mode of MOS-6502
+     * processor.
+     * 
+     * @return an address
+     */
     private int indywr()
     {
         int zp = fetch();
@@ -503,52 +533,93 @@ public class MOS6502 extends AbstractCPU
         return result.toString();
     }
 
-    private static final short BRK = 0x00;
-    private static final short PHP = 0x08;
-    private static final short PLP = 0x28;
-    private static final short PHA = 0x48;
-    private static final short PLA = 0x68;
-    private static final short STA_IZX = 0x81;
-    private static final short STY_ZP = 0x84;
-    private static final short STA_ZP = 0x85;
-    private static final short STX_ZP = 0x86;
-    private static final short DEY = 0x88;
-    private static final short TXA = 0x8A;
-    private static final short STY_ABS = 0x8C;
-    private static final short STA_ABS = 0x8D;
-    private static final short STX_ABS = 0x8E;
-    private static final short STA_IZY = 0x91;
-    private static final short STY_ZPX = 0x94;
-    private static final short STA_ZPX = 0x95;
-    private static final short STX_ZPY = 0x96;
-    private static final short TYA = 0x98;
-    private static final short STA_ABY = 0x99;
-    private static final short TXS = 0x9A;
-    private static final short STA_ABX = 0x9D;
-    private static final short LDY_IMM = 0xA0;
-    private static final short LDA_IZX = 0xA1;
-    private static final short LDX_IMM = 0xA2;
-    private static final short LDY_ZP = 0xA4;
-    private static final short LDA_ZP = 0xA5;
-    private static final short LDX_ZP = 0xA6;
-    private static final short TAY = 0xA8;
+    // Load/Store Operations
     private static final short LDA_IMM = 0xA9;
-    private static final short TAX = 0xAA;
-    private static final short LDY_ABS = 0xAC;
-    private static final short LDA_ABS = 0xAD;
-    private static final short LDX_ABS = 0xAE;
-    private static final short LDA_IZY = 0xB1;
-    private static final short LDY_ZPX = 0xB4;
+    private static final short LDA_ZP = 0xA5;
     private static final short LDA_ZPX = 0xB5;
-    private static final short LDX_ZPY = 0xB6;
-    private static final short LDA_ABY = 0xB9;
-    private static final short TSX = 0xBA;
-    private static final short LDY_ABX = 0xBC;
+    private static final short LDA_ABS = 0xAD;
     private static final short LDA_ABX = 0xBD;
+    private static final short LDA_ABY = 0xB9;
+    private static final short LDA_IZX = 0xA1;
+    private static final short LDA_IZY = 0xB1;
+
+    private static final short LDX_IMM = 0xA2;
+    private static final short LDX_ZP = 0xA6;
+    private static final short LDX_ZPY = 0xB6;
+    private static final short LDX_ABS = 0xAE;
     private static final short LDX_ABY = 0xBE;
-    private static final short INY = 0xC8;
-    private static final short DEX = 0xCA;
+
+    private static final short LDY_IMM = 0xA0;
+    private static final short LDY_ZP = 0xA4;
+    private static final short LDY_ZPX = 0xB4;
+    private static final short LDY_ABS = 0xAC;
+    private static final short LDY_ABX = 0xBC;
+
+    private static final short STA_ZP = 0x85;
+    private static final short STA_ZPX = 0x95;
+    private static final short STA_ABS = 0x8D;
+    private static final short STA_ABX = 0x9D;
+    private static final short STA_ABY = 0x99;
+    private static final short STA_IZX = 0x81;
+    private static final short STA_IZY = 0x91;
+
+    private static final short STX_ZP = 0x86;
+    private static final short STX_ZPY = 0x96;
+    private static final short STX_ABS = 0x8E;
+
+    private static final short STY_ZP = 0x84;
+    private static final short STY_ZPX = 0x94;
+    private static final short STY_ABS = 0x8C;
+
+
+    // Register Transfers
+    private static final short TAX = 0xAA;
+
+    private static final short TAY = 0xA8;
+
+    private static final short TXA = 0x8A;
+
+    private static final short TYA = 0x98;
+
+
+    // Stack Operations
+    private static final short TSX = 0xBA;
+
+    private static final short TXS = 0x9A;
+
+    private static final short PHA = 0x48;
+
+    private static final short PHP = 0x08;
+
+    private static final short PLA = 0x68;
+
+    private static final short PLP = 0x28;
+
+
+    //Logical
+    private static final short AND_IMM = 0x29;
+    private static final short AND_ZP = 0x25;
+    private static final short AND_ZPX = 0x35;
+    private static final short AND_ABS = 0x2D;
+    private static final short AND_ABX = 0x3D;
+    private static final short AND_ABY = 0x39;
+    private static final short AND_IZX = 0x21;
+    private static final short AND_IZY = 0x31;
+
+
+    // Increments & Decrements
     private static final short INX = 0xE8;
+
+    private static final short INY = 0xC8;
+
+    private static final short DEX = 0xCA;
+
+    private static final short DEY = 0x88;
+
+
+    // System Functions
+    private static final short BRK = 0x00;
+
     private static final short NOP = 0xEA;
 
 }

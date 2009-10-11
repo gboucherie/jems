@@ -19,8 +19,8 @@ public class MOS6502 extends AbstractCPU
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 10 .. 1F
         0, 6, 0, 0, 0, 3, 0, 0, 4, 2, 0, 0, 0, 4, 0, 0, // 20 .. 2F
         0, 5, 0, 0, 0, 4, 0, 0, 0, 4, 0, 0, 0, 4, 0, 0, // 30 .. 3F
-        0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, // 40 .. 4F
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 50 .. 5F
+        0, 6, 0, 0, 0, 3, 0, 0, 3, 2, 0, 0, 0, 4, 0, 0, // 40 .. 4F
+        0, 5, 0, 0, 0, 4, 0, 0, 0, 4, 0, 0, 0, 4, 0, 0, // 50 .. 5F
         0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, // 60 .. 6F
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 70 .. 7F
         0, 6, 0, 0, 3, 3, 3, 0, 2, 0, 2, 0, 4, 4, 4, 0, // 80 .. 8F
@@ -136,8 +136,32 @@ public class MOS6502 extends AbstractCPU
             case AND_ABX:
                 setNZ(a &= memory.readByte(absrd(x)));
                 break;
+            case EOR_IZX:
+                setNZ(a ^= memory.readByte(indx()));
+                break;
+            case EOR_ZP:
+                setNZ(a ^= memory.readByte(fetch()));
+                break;
             case PHA:
                 push(a);
+                break;
+            case EOR_IMM:
+                setNZ(a ^= fetch());
+                break;
+            case EOR_ABS:
+                setNZ(a ^= memory.readByte(fetchShort()));
+                break;
+            case EOR_IZY:
+                setNZ(a ^= memory.readByte(indyrd()));
+                break;
+            case EOR_ZPX:
+                setNZ(a ^= memory.readByte((fetch() + x) & BYTE_MASK));
+                break;
+            case EOR_ABY:
+                setNZ(a ^= memory.readByte(absrd(y)));
+                break;
+            case EOR_ABX:
+                setNZ(a ^= memory.readByte(absrd(x)));
                 break;
             case PLA:
                 a = pop();
@@ -605,6 +629,15 @@ public class MOS6502 extends AbstractCPU
     private static final short AND_ABY = 0x39;
     private static final short AND_IZX = 0x21;
     private static final short AND_IZY = 0x31;
+
+    private static final short EOR_IMM = 0x49;
+    private static final short EOR_ZP = 0x45;
+    private static final short EOR_ZPX = 0x55;
+    private static final short EOR_ABS = 0x4D;
+    private static final short EOR_ABX = 0x5D;
+    private static final short EOR_ABY = 0x59;
+    private static final short EOR_IZX = 0x41;
+    private static final short EOR_IZY = 0x51;
 
 
     // Increments & Decrements

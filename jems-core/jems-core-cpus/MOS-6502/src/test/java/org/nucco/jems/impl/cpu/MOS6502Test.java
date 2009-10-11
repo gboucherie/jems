@@ -511,6 +511,111 @@ public class MOS6502Test
     }
 
     @Test
+    public void test_EOR_IndirectX_Positive()
+    {
+        Assert.assertEquals(6, MOS6502.CYCLES[0x41]);
+        MOS6502State expected = new MOS6502State((short) 0x06, (short) 0x01, (short) 0xFF, (short) 0xFF, (short) 0x7D, (int) 0x0002);
+        cpu.setA((short) 0xA5);
+        cpu.setX((short) 0x01);
+        EasyMock.expect(memory.readByte(0x0000)).andReturn((short) 0x41);
+        EasyMock.expect(memory.readByte(0x0001)).andReturn((short) 0x21);
+        EasyMock.expect(memory.readByte(0x0022)).andReturn((short) 0x12);
+        EasyMock.expect(memory.readByte(0x0023)).andReturn((short) 0x78);
+        EasyMock.expect(memory.readByte(0x7812)).andReturn((short) 0xA3);
+        control.replay();
+        cpu.step();
+        control.verify();
+        MOS6502State after = new MOS6502State(cpu);
+        Assert.assertEquals(expected, after);
+    }
+
+    @Test
+    public void test_EOR_IndirectX_Zero()
+    {
+        Assert.assertEquals(6, MOS6502.CYCLES[0x41]);
+        MOS6502State expected = new MOS6502State((short) 0x00, (short) 0x01, (short) 0xFF, (short) 0xFF, (short) 0x7F, (int) 0x0002);
+        cpu.setA((short) 0xA5);
+        cpu.setX((short) 0x01);
+        EasyMock.expect(memory.readByte(0x0000)).andReturn((short) 0x41);
+        EasyMock.expect(memory.readByte(0x0001)).andReturn((short) 0x21);
+        EasyMock.expect(memory.readByte(0x0022)).andReturn((short) 0x12);
+        EasyMock.expect(memory.readByte(0x0023)).andReturn((short) 0x78);
+        EasyMock.expect(memory.readByte(0x7812)).andReturn((short) 0xA5);
+        control.replay();
+        cpu.step();
+        control.verify();
+        MOS6502State after = new MOS6502State(cpu);
+        Assert.assertEquals(expected, after);
+    }
+
+    @Test
+    public void test_EOR_IndirectX_Negative()
+    {
+        Assert.assertEquals(6, MOS6502.CYCLES[0x41]);
+        MOS6502State expected = new MOS6502State((short) 0xAF, (short) 0x01, (short) 0xFF, (short) 0xFF, (short) 0xFD, (int) 0x0002);
+        cpu.setA((short) 0xA5);
+        cpu.setX((short) 0x01);
+        EasyMock.expect(memory.readByte(0x0000)).andReturn((short) 0x41);
+        EasyMock.expect(memory.readByte(0x0001)).andReturn((short) 0x21);
+        EasyMock.expect(memory.readByte(0x0022)).andReturn((short) 0x12);
+        EasyMock.expect(memory.readByte(0x0023)).andReturn((short) 0x78);
+        EasyMock.expect(memory.readByte(0x7812)).andReturn((short) 0x0A);
+        control.replay();
+        cpu.step();
+        control.verify();
+        MOS6502State after = new MOS6502State(cpu);
+        Assert.assertEquals(expected, after);
+    }
+
+    @Test
+    public void test_EOR_ZeroPage_Positive()
+    {
+        Assert.assertEquals(3, MOS6502.CYCLES[0x45]);
+        MOS6502State expected = new MOS6502State((short) 0x06, (short) 0xFF, (short) 0xFF, (short) 0xFF, (short) 0x7D, (int) 0x0002);
+        cpu.setA((short) 0xA5);
+        EasyMock.expect(memory.readByte(0x0000)).andReturn((short) 0x45);
+        EasyMock.expect(memory.readByte(0x0001)).andReturn((short) 0x57);
+        EasyMock.expect(memory.readByte(0x0057)).andReturn((short) 0xA3);
+        control.replay();
+        cpu.step();
+        control.verify();
+        MOS6502State result = new MOS6502State(cpu);
+        Assert.assertEquals(expected, result);
+    }
+
+    @Test
+    public void test_EOR_ZeroPage_Zero()
+    {
+        Assert.assertEquals(3, MOS6502.CYCLES[0x45]);
+        MOS6502State expected = new MOS6502State((short) 0x00, (short) 0xFF, (short) 0xFF, (short) 0xFF, (short) 0x7F, (int) 0x0002);
+        cpu.setA((short) 0xA5);
+        EasyMock.expect(memory.readByte(0x0000)).andReturn((short) 0x45);
+        EasyMock.expect(memory.readByte(0x0001)).andReturn((short) 0x57);
+        EasyMock.expect(memory.readByte(0x0057)).andReturn((short) 0xA5);
+        control.replay();
+        cpu.step();
+        control.verify();
+        MOS6502State result = new MOS6502State(cpu);
+        Assert.assertEquals(expected, result);
+    }
+
+    @Test
+    public void test_EOR_ZeroPage_Negative()
+    {
+        Assert.assertEquals(3, MOS6502.CYCLES[0x45]);
+        MOS6502State expected = new MOS6502State((short) 0xAF, (short) 0xFF, (short) 0xFF, (short) 0xFF, (short) 0xFD, (int) 0x0002);
+        cpu.setA((short) 0xA5);
+        EasyMock.expect(memory.readByte(0x0000)).andReturn((short) 0x45);
+        EasyMock.expect(memory.readByte(0x0001)).andReturn((short) 0x57);
+        EasyMock.expect(memory.readByte(0x0057)).andReturn((short) 0x0A);
+        control.replay();
+        cpu.step();
+        control.verify();
+        MOS6502State result = new MOS6502State(cpu);
+        Assert.assertEquals(expected, result);
+    }
+
+    @Test
     public void test_PHA()
     {
         Assert.assertEquals(3, MOS6502.CYCLES[0x48]);
@@ -518,6 +623,318 @@ public class MOS6502Test
         cpu.setA((short) 0x58);
         EasyMock.expect(memory.readByte(0x0000)).andReturn((short) 0x48);
         memory.writeByte(0x01FF, (short) 0x58);
+        control.replay();
+        cpu.step();
+        control.verify();
+        MOS6502State result = new MOS6502State(cpu);
+        Assert.assertEquals(expected, result);
+    }
+
+    @Test
+    public void test_EOR_Immediate_Positive()
+    {
+        Assert.assertEquals(2, MOS6502.CYCLES[0x49]);
+        MOS6502State expected = new MOS6502State((short) 0x06, (short) 0xFF, (short) 0xFF, (short) 0xFF, (short) 0x7D, (int) 0x0002);
+        cpu.setA((short) 0xA5);
+        EasyMock.expect(memory.readByte(0x0000)).andReturn((short) 0x49);
+        EasyMock.expect(memory.readByte(0x0001)).andReturn((short) 0xA3);
+        control.replay();
+        cpu.step();
+        control.verify();
+        MOS6502State result = new MOS6502State(cpu);
+        Assert.assertEquals(expected, result);
+    }
+
+    @Test
+    public void test_EOR_Immediate_Zero()
+    {
+        Assert.assertEquals(2, MOS6502.CYCLES[0x49]);
+        MOS6502State expected = new MOS6502State((short) 0x00, (short) 0xFF, (short) 0xFF, (short) 0xFF, (short) 0x7F, (int) 0x0002);
+        cpu.setA((short) 0xA5);
+        EasyMock.expect(memory.readByte(0x0000)).andReturn((short) 0x49);
+        EasyMock.expect(memory.readByte(0x0001)).andReturn((short) 0xA5);
+        control.replay();
+        cpu.step();
+        control.verify();
+        MOS6502State result = new MOS6502State(cpu);
+        Assert.assertEquals(expected, result);
+    }
+
+    @Test
+    public void test_EOR_Immediate_Negative()
+    {
+        Assert.assertEquals(2, MOS6502.CYCLES[0x49]);
+        MOS6502State expected = new MOS6502State((short) 0xAF, (short) 0xFF, (short) 0xFF, (short) 0xFF, (short) 0xFD, (int) 0x0002);
+        cpu.setA((short) 0xA5);
+        EasyMock.expect(memory.readByte(0x0000)).andReturn((short) 0x49);
+        EasyMock.expect(memory.readByte(0x0001)).andReturn((short) 0x0A);
+        control.replay();
+        cpu.step();
+        control.verify();
+        MOS6502State result = new MOS6502State(cpu);
+        Assert.assertEquals(expected, result);
+    }
+
+    @Test
+    public void test_EOR_Absolute_Positive()
+    {
+        Assert.assertEquals(4, MOS6502.CYCLES[0x4D]);
+        MOS6502State expected = new MOS6502State((short) 0x06, (short) 0xFF, (short) 0xFF, (short) 0xFF, (short) 0x7D, (int) 0x0003);
+        cpu.setA((short) 0xA5);
+        EasyMock.expect(memory.readByte(0x0000)).andReturn((short) 0x4D);
+        EasyMock.expect(memory.readByte(0x0001)).andReturn((short) 0xF0);
+        EasyMock.expect(memory.readByte(0x0002)).andReturn((short) 0x57);
+        EasyMock.expect(memory.readByte(0x57F0)).andReturn((short) 0xA3);
+        control.replay();
+        cpu.step();
+        control.verify();
+        MOS6502State result = new MOS6502State(cpu);
+        Assert.assertEquals(expected, result);
+    }
+
+    @Test
+    public void test_EOR_Absolute_Zero()
+    {
+        Assert.assertEquals(4, MOS6502.CYCLES[0x4D]);
+        MOS6502State expected = new MOS6502State((short) 0x00, (short) 0xFF, (short) 0xFF, (short) 0xFF, (short) 0x7F, (int) 0x0003);
+        cpu.setA((short) 0xA5);
+        EasyMock.expect(memory.readByte(0x0000)).andReturn((short) 0x4D);
+        EasyMock.expect(memory.readByte(0x0001)).andReturn((short) 0xF0);
+        EasyMock.expect(memory.readByte(0x0002)).andReturn((short) 0x57);
+        EasyMock.expect(memory.readByte(0x57F0)).andReturn((short) 0xA5);
+        control.replay();
+        cpu.step();
+        control.verify();
+        MOS6502State result = new MOS6502State(cpu);
+        Assert.assertEquals(expected, result);
+    }
+
+    @Test
+    public void test_EOR_Absolute_Negative()
+    {
+        Assert.assertEquals(4, MOS6502.CYCLES[0x4D]);
+        MOS6502State expected = new MOS6502State((short) 0xAF, (short) 0xFF, (short) 0xFF, (short) 0xFF, (short) 0xFD, (int) 0x0003);
+        cpu.setA((short) 0xA5);
+        EasyMock.expect(memory.readByte(0x0000)).andReturn((short) 0x4D);
+        EasyMock.expect(memory.readByte(0x0001)).andReturn((short) 0xF0);
+        EasyMock.expect(memory.readByte(0x0002)).andReturn((short) 0x57);
+        EasyMock.expect(memory.readByte(0x57F0)).andReturn((short) 0x0A);
+        control.replay();
+        cpu.step();
+        control.verify();
+        MOS6502State result = new MOS6502State(cpu);
+        Assert.assertEquals(expected, result);
+    }
+
+    @Test
+    public void test_EOR_IndirectY_Positive()
+    {
+        Assert.assertEquals(5, MOS6502.CYCLES[0x51]);
+        MOS6502State expected = new MOS6502State((short) 0x06, (short) 0xFF, (short) 0x15, (short) 0xFF, (short) 0x7D, (int) 0x0002);
+        cpu.setA((short) 0xA5);
+        cpu.setY((short) 0x15);
+        EasyMock.expect(memory.readByte(0x0000)).andReturn((short) 0x51);
+        EasyMock.expect(memory.readByte(0x0001)).andReturn((short) 0x21);
+        EasyMock.expect(memory.readByte(0x0021)).andReturn((short) 0x12);
+        EasyMock.expect(memory.readByte(0x0022)).andReturn((short) 0x78);
+        EasyMock.expect(memory.readByte(0x7827)).andReturn((short) 0xA3);
+        control.replay();
+        cpu.step();
+        control.verify();
+        MOS6502State after = new MOS6502State(cpu);
+        Assert.assertEquals(expected, after);
+    }
+
+    @Test
+    public void test_EOR_IndirectY_Zero()
+    {
+        Assert.assertEquals(5, MOS6502.CYCLES[0x51]);
+        MOS6502State expected = new MOS6502State((short) 0x00, (short) 0xFF, (short) 0x15, (short) 0xFF, (short) 0x7F, (int) 0x0002);
+        cpu.setA((short) 0xA5);
+        cpu.setY((short) 0x15);
+        EasyMock.expect(memory.readByte(0x0000)).andReturn((short) 0x51);
+        EasyMock.expect(memory.readByte(0x0001)).andReturn((short) 0x21);
+        EasyMock.expect(memory.readByte(0x0021)).andReturn((short) 0x12);
+        EasyMock.expect(memory.readByte(0x0022)).andReturn((short) 0x78);
+        EasyMock.expect(memory.readByte(0x7827)).andReturn((short) 0xA5);
+        control.replay();
+        cpu.step();
+        control.verify();
+        MOS6502State after = new MOS6502State(cpu);
+        Assert.assertEquals(expected, after);
+    }
+
+    @Test
+    public void test_EOR_IndirectY_Negative()
+    {
+        Assert.assertEquals(5, MOS6502.CYCLES[0x51]);
+        MOS6502State expected = new MOS6502State((short) 0xAF, (short) 0xFF, (short) 0x15, (short) 0xFF, (short) 0xFD, (int) 0x0002);
+        cpu.setA((short) 0xA5);
+        cpu.setY((short) 0x15);
+        EasyMock.expect(memory.readByte(0x0000)).andReturn((short) 0x51);
+        EasyMock.expect(memory.readByte(0x0001)).andReturn((short) 0x21);
+        EasyMock.expect(memory.readByte(0x0021)).andReturn((short) 0x12);
+        EasyMock.expect(memory.readByte(0x0022)).andReturn((short) 0x78);
+        EasyMock.expect(memory.readByte(0x7827)).andReturn((short) 0x0A);
+        control.replay();
+        cpu.step();
+        control.verify();
+        MOS6502State after = new MOS6502State(cpu);
+        Assert.assertEquals(expected, after);
+    }
+
+    @Test
+    public void test_EOR_ZeroPageX_Positive()
+    {
+        Assert.assertEquals(4, MOS6502.CYCLES[0x55]);
+        MOS6502State expected = new MOS6502State((short) 0x06, (short) 0x08, (short) 0xFF, (short) 0xFF, (short) 0x7D, (int) 0x0002);
+        cpu.setA((short) 0xA5);
+        cpu.setX((short) 0x08);
+        EasyMock.expect(memory.readByte(0x0000)).andReturn((short) 0x55);
+        EasyMock.expect(memory.readByte(0x0001)).andReturn((short) 0xF0);
+        EasyMock.expect(memory.readByte(0x00F8)).andReturn((short) 0xA3);
+        control.replay();
+        cpu.step();
+        control.verify();
+        MOS6502State result = new MOS6502State(cpu);
+        Assert.assertEquals(expected, result);
+    }
+
+    @Test
+    public void test_EOR_ZeroPageX_Zero()
+    {
+        Assert.assertEquals(4, MOS6502.CYCLES[0x55]);
+        MOS6502State expected = new MOS6502State((short) 0x00, (short) 0x08, (short) 0xFF, (short) 0xFF, (short) 0x7F, (int) 0x0002);
+        cpu.setA((short) 0xA5);
+        cpu.setX((short) 0x08);
+        EasyMock.expect(memory.readByte(0x0000)).andReturn((short) 0x55);
+        EasyMock.expect(memory.readByte(0x0001)).andReturn((short) 0xF0);
+        EasyMock.expect(memory.readByte(0x00F8)).andReturn((short) 0xA5);
+        control.replay();
+        cpu.step();
+        control.verify();
+        MOS6502State result = new MOS6502State(cpu);
+        Assert.assertEquals(expected, result);
+    }
+
+    @Test
+    public void test_EOR_ZeroPageX_Negative()
+    {
+        Assert.assertEquals(4, MOS6502.CYCLES[0x55]);
+        MOS6502State expected = new MOS6502State((short) 0xAF, (short) 0x08, (short) 0xFF, (short) 0xFF, (short) 0xFD, (int) 0x0002);
+        cpu.setA((short) 0xA5);
+        cpu.setX((short) 0x08);
+        EasyMock.expect(memory.readByte(0x0000)).andReturn((short) 0x55);
+        EasyMock.expect(memory.readByte(0x0001)).andReturn((short) 0xF0);
+        EasyMock.expect(memory.readByte(0x00F8)).andReturn((short) 0x0A);
+        control.replay();
+        cpu.step();
+        control.verify();
+        MOS6502State result = new MOS6502State(cpu);
+        Assert.assertEquals(expected, result);
+    }
+
+    @Test
+    public void test_EOR_AbsoluteY_Positive()
+    {
+        Assert.assertEquals(4, MOS6502.CYCLES[0x59]);
+        MOS6502State expected = new MOS6502State((short) 0x06, (short) 0xFF, (short) 0x01, (short) 0xFF, (short) 0x7D, (int) 0x0003);
+        cpu.setA((short) 0xA5);
+        cpu.setY((short) 0x01);
+        EasyMock.expect(memory.readByte(0x0000)).andReturn((short) 0x59);
+        EasyMock.expect(memory.readByte(0x0001)).andReturn((short) 0xF0);
+        EasyMock.expect(memory.readByte(0x0002)).andReturn((short) 0x57);
+        EasyMock.expect(memory.readByte(0x57F1)).andReturn((short) 0xA3);
+        control.replay();
+        cpu.step();
+        control.verify();
+        MOS6502State result = new MOS6502State(cpu);
+        Assert.assertEquals(expected, result);
+    }
+
+    @Test
+    public void test_EOR_AbsoluteY_Zero()
+    {
+        Assert.assertEquals(4, MOS6502.CYCLES[0x59]);
+        MOS6502State expected = new MOS6502State((short) 0x00, (short) 0xFF, (short) 0x01, (short) 0xFF, (short) 0x7F, (int) 0x0003);
+        cpu.setA((short) 0xA5);
+        cpu.setY((short) 0x01);
+        EasyMock.expect(memory.readByte(0x0000)).andReturn((short) 0x59);
+        EasyMock.expect(memory.readByte(0x0001)).andReturn((short) 0xF0);
+        EasyMock.expect(memory.readByte(0x0002)).andReturn((short) 0x57);
+        EasyMock.expect(memory.readByte(0x57F1)).andReturn((short) 0xA5);
+        control.replay();
+        cpu.step();
+        control.verify();
+        MOS6502State result = new MOS6502State(cpu);
+        Assert.assertEquals(expected, result);
+    }
+
+    @Test
+    public void test_EOR_AbsoluteY_Negative()
+    {
+        Assert.assertEquals(4, MOS6502.CYCLES[0x59]);
+        MOS6502State expected = new MOS6502State((short) 0xAF, (short) 0xFF, (short) 0x01, (short) 0xFF, (short) 0xFD, (int) 0x0003);
+        cpu.setA((short) 0xA5);
+        cpu.setY((short) 0x01);
+        EasyMock.expect(memory.readByte(0x0000)).andReturn((short) 0x59);
+        EasyMock.expect(memory.readByte(0x0001)).andReturn((short) 0xF0);
+        EasyMock.expect(memory.readByte(0x0002)).andReturn((short) 0x57);
+        EasyMock.expect(memory.readByte(0x57F1)).andReturn((short) 0x0A);
+        control.replay();
+        cpu.step();
+        control.verify();
+        MOS6502State result = new MOS6502State(cpu);
+        Assert.assertEquals(expected, result);
+    }
+
+    @Test
+    public void test_EOR_AbsoluteX_Positive()
+    {
+        Assert.assertEquals(4, MOS6502.CYCLES[0x5D]);
+        MOS6502State expected = new MOS6502State((short) 0x06, (short) 0x01, (short) 0xFF, (short) 0xFF, (short) 0x7D, (int) 0x0003);
+        cpu.setA((short) 0xA5);
+        cpu.setX((short) 0x01);
+        EasyMock.expect(memory.readByte(0x0000)).andReturn((short) 0x5D);
+        EasyMock.expect(memory.readByte(0x0001)).andReturn((short) 0xF0);
+        EasyMock.expect(memory.readByte(0x0002)).andReturn((short) 0x57);
+        EasyMock.expect(memory.readByte(0x57F1)).andReturn((short) 0xA3);
+        control.replay();
+        cpu.step();
+        control.verify();
+        MOS6502State result = new MOS6502State(cpu);
+        Assert.assertEquals(expected, result);
+    }
+
+    @Test
+    public void test_EOR_AbsoluteX_Zero()
+    {
+        Assert.assertEquals(4, MOS6502.CYCLES[0x5D]);
+        MOS6502State expected = new MOS6502State((short) 0x00, (short) 0x01, (short) 0xFF, (short) 0xFF, (short) 0x7F, (int) 0x0003);
+        cpu.setA((short) 0xA5);
+        cpu.setX((short) 0x01);
+        EasyMock.expect(memory.readByte(0x0000)).andReturn((short) 0x5D);
+        EasyMock.expect(memory.readByte(0x0001)).andReturn((short) 0xF0);
+        EasyMock.expect(memory.readByte(0x0002)).andReturn((short) 0x57);
+        EasyMock.expect(memory.readByte(0x57F1)).andReturn((short) 0xA5);
+        control.replay();
+        cpu.step();
+        control.verify();
+        MOS6502State result = new MOS6502State(cpu);
+        Assert.assertEquals(expected, result);
+    }
+
+    @Test
+    public void test_EOR_AbsoluteX_Negative()
+    {
+        Assert.assertEquals(4, MOS6502.CYCLES[0x5D]);
+        MOS6502State expected = new MOS6502State((short) 0xAF, (short) 0x01, (short) 0xFF, (short) 0xFF, (short) 0xFD, (int) 0x0003);
+        cpu.setA((short) 0xA5);
+        cpu.setX((short) 0x01);
+        EasyMock.expect(memory.readByte(0x0000)).andReturn((short) 0x5D);
+        EasyMock.expect(memory.readByte(0x0001)).andReturn((short) 0xF0);
+        EasyMock.expect(memory.readByte(0x0002)).andReturn((short) 0x57);
+        EasyMock.expect(memory.readByte(0x57F1)).andReturn((short) 0x0A);
         control.replay();
         cpu.step();
         control.verify();

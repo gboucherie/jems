@@ -94,6 +94,51 @@ public class MOS6502Test
     }
 
     @Test
+    public void test_PLA_Positive()
+    {
+        Assert.assertEquals(4, MOS6502.CYCLES[0x68]);
+        MOS6502State expected = new MOS6502State((short) 0x08, (short) 0xFF, (short) 0xFF, (short) 0x59, (short) 0x7D, (int) 0x0001);
+        cpu.setSP((short) 0x58);
+        EasyMock.expect(memory.readByte(0x0000)).andReturn((short) 0x68);
+        EasyMock.expect(memory.readByte(0x0158)).andReturn((short) 0x08);
+        control.replay();
+        cpu.step();
+        control.verify();
+        MOS6502State result = new MOS6502State(cpu);
+        Assert.assertEquals(expected, result);
+    }
+
+    @Test
+    public void test_PLA_Zero()
+    {
+        Assert.assertEquals(4, MOS6502.CYCLES[0x68]);
+        MOS6502State expected = new MOS6502State((short) 0x00, (short) 0xFF, (short) 0xFF, (short) 0x59, (short) 0x7F, (int) 0x0001);
+        cpu.setSP((short) 0x58);
+        EasyMock.expect(memory.readByte(0x0000)).andReturn((short) 0x68);
+        EasyMock.expect(memory.readByte(0x0158)).andReturn((short) 0x00);
+        control.replay();
+        cpu.step();
+        control.verify();
+        MOS6502State result = new MOS6502State(cpu);
+        Assert.assertEquals(expected, result);
+    }
+
+    @Test
+    public void test_PLA_Negative()
+    {
+        Assert.assertEquals(4, MOS6502.CYCLES[0x68]);
+        MOS6502State expected = new MOS6502State((short) 0x98, (short) 0xFF, (short) 0xFF, (short) 0x59, (short) 0xFD, (int) 0x0001);
+        cpu.setSP((short) 0x58);
+        EasyMock.expect(memory.readByte(0x0000)).andReturn((short) 0x68);
+        EasyMock.expect(memory.readByte(0x0158)).andReturn((short) 0x98);
+        control.replay();
+        cpu.step();
+        control.verify();
+        MOS6502State result = new MOS6502State(cpu);
+        Assert.assertEquals(expected, result);
+    }
+
+    @Test
     public void test_STA_IndirectX()
     {
         Assert.assertEquals(6, MOS6502.CYCLES[0x81]);

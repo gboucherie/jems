@@ -21,7 +21,7 @@ public class MOS6502 extends AbstractCPU
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 30 .. 3F
         0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, // 40 .. 4F
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 50 .. 5F
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 60 .. 6F
+        0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, // 60 .. 6F
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 70 .. 7F
         0, 6, 0, 0, 3, 3, 3, 0, 2, 0, 2, 0, 4, 4, 4, 0, // 80 .. 8F
         0, 6, 0, 0, 4, 4, 4, 0, 2, 5, 2, 0, 0, 5, 0, 0, // 90 .. 9F
@@ -111,6 +111,10 @@ public class MOS6502 extends AbstractCPU
                 break;
             case PHA:
                 push(a);
+                break;
+            case PLA:
+                a = pop();
+                setNZ(a);
                 break;
             case STA_IZX:
                 memory.writeByte(indx(), a);
@@ -311,7 +315,7 @@ public class MOS6502 extends AbstractCPU
 
     /*
      * (non-Javadoc) Push a 16bits value on the stack and decrement twice the
-     * stack
+     * stack register.
      * 
      * @param value the 16bits value to push on the stack
      */
@@ -319,6 +323,19 @@ public class MOS6502 extends AbstractCPU
     {
         push((short) (value >> 8));
         push((short) value);
+    }
+
+    /*
+     * (non-Javadoc) Pop a 8bits value from the stack and increment one the
+     * stack register.
+     * 
+     * @param value the 16bits value to push on the stack
+     */
+    private short pop()
+    {
+        short value = memory.readByte(0x0100 + sp);
+        sp = (short) ((sp + 1) & BYTE_MASK);
+        return value;
     }
 
     /*
@@ -486,6 +503,7 @@ public class MOS6502 extends AbstractCPU
     private static final short BRK = 0x00;
     private static final short PHP = 0x08;
     private static final short PHA = 0x48;
+    private static final short PLA = 0x68;
     private static final short STA_IZX = 0x81;
     private static final short STY_ZP = 0x84;
     private static final short STA_ZP = 0x85;

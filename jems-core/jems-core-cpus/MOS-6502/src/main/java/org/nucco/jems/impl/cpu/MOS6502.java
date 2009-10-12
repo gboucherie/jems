@@ -67,12 +67,19 @@ public class MOS6502 extends AbstractCPU
 
     private String cpuName = "MOS-6502";
 
-    private short a = 0xFF; // accumulator
-    private short x = 0xFF; // x register
-    private short y = 0xFF; // y register
-    private short sp = 0xFF; // stack pointer
-    private short sr = 0xFF; // processor status register
-    private int pc = 0x0000; // program counter
+    private static final short DEFAULT_REGISTER_VALUE = 0xFF;
+    private static final int DEFAULT_PC_VALUE = 0x0000;
+    private static final int BREAK_ADDRRESS = 0xFFFE;
+    private static final int STACK_ADDRESS = 0x0100;
+    private static final byte SHIFT_8BITS = 8;
+    private static final int PAGE_CROSS_TEST = 0xFF00;
+
+    private short a = DEFAULT_REGISTER_VALUE; // accumulator
+    private short x = DEFAULT_REGISTER_VALUE; // x register
+    private short y = DEFAULT_REGISTER_VALUE; // y register
+    private short sp = DEFAULT_REGISTER_VALUE; // stack pointer
+    private short sr = DEFAULT_REGISTER_VALUE; // processor status register
+    private int pc = DEFAULT_PC_VALUE; // program counter
 
     public MOS6502(Memory memory)
     {
@@ -104,40 +111,50 @@ public class MOS6502 extends AbstractCPU
                 pushShort(pc);
                 push((short) (sr | B_FLAG));
                 sr = (short) (sr | I_FLAG);
-                pc = readShort(0xFFFE);
+                pc = readShort(BREAK_ADDRRESS);
                 break;
             case ORA_IZX:
-                setNZ(a |= memory.readByte(indx()));
+                a |= memory.readByte(indx());
+                setNZ(a);
                 break;
             case ORA_ZP:
-                setNZ(a |= memory.readByte(fetch()));
+                a |= memory.readByte(fetch());
+                setNZ(a);
                 break;
             case PHP:
                 push(sr);
                 break;
             case ORA_IMM:
-                setNZ(a |= fetch());
+                a |= fetch();
+                setNZ(a);
                 break;
             case ORA_ABS:
-                setNZ(a |= memory.readByte(fetchShort()));
+                a |= memory.readByte(fetchShort());
+                setNZ(a);
                 break;
             case ORA_IZY:
-                setNZ(a |= memory.readByte(indyrd()));
+                a |= memory.readByte(indyrd());
+                setNZ(a);
                 break;
             case ORA_ZPX:
-                setNZ(a |= memory.readByte(fetch() + x) & BYTE_MASK);
+                a |= memory.readByte(fetch() + x) & BYTE_MASK;
+                setNZ(a);
                 break;
             case ORA_ABY:
-                setNZ(a |= memory.readByte(absrd(y)));
+                a |= memory.readByte(absrd(y));
+                setNZ(a);
                 break;
             case ORA_ABX:
-                setNZ(a |= memory.readByte(absrd(x)));
+                a |= memory.readByte(absrd(x));
+                setNZ(a);
                 break;
             case AND_IZX:
-                setNZ(a &= memory.readByte(indx()));
+                a &= memory.readByte(indx());
+                setNZ(a);
                 break;
             case AND_ZP:
-                setNZ(a &= memory.readByte(fetch()));
+                a &= memory.readByte(fetch());
+                setNZ(a);
                 break;
             case PLP:
                 sr = pop();
@@ -146,46 +163,59 @@ public class MOS6502 extends AbstractCPU
                 setNZ(a &= fetch());
                 break;
             case AND_ABS:
-                setNZ(a &= memory.readByte(fetchShort()));
+                a &= memory.readByte(fetchShort());
+                setNZ(a);
                 break;
             case AND_IZY:
-                setNZ(a &= memory.readByte(indyrd()));
+                a &= memory.readByte(indyrd());
+                setNZ(a);
                 break;
             case AND_ZPX:
-                setNZ(a &= memory.readByte((fetch() + x) & BYTE_MASK));
+                a &= memory.readByte((fetch() + x) & BYTE_MASK);
+                setNZ(a);
                 break;
             case AND_ABY:
-                setNZ(a &= memory.readByte(absrd(y)));
+                a &= memory.readByte(absrd(y));
+                setNZ(a);
                 break;
             case AND_ABX:
-                setNZ(a &= memory.readByte(absrd(x)));
+                a &= memory.readByte(absrd(x));
+                setNZ(a);
                 break;
             case EOR_IZX:
-                setNZ(a ^= memory.readByte(indx()));
+                a ^= memory.readByte(indx());
+                setNZ(a);
                 break;
             case EOR_ZP:
-                setNZ(a ^= memory.readByte(fetch()));
+                a ^= memory.readByte(fetch());
+                setNZ(a);
                 break;
             case PHA:
                 push(a);
                 break;
             case EOR_IMM:
-                setNZ(a ^= fetch());
+                a ^= fetch();
+                setNZ(a);
                 break;
             case EOR_ABS:
-                setNZ(a ^= memory.readByte(fetchShort()));
+                a ^= memory.readByte(fetchShort());
+                setNZ(a);
                 break;
             case EOR_IZY:
-                setNZ(a ^= memory.readByte(indyrd()));
+                a ^= memory.readByte(indyrd());
+                setNZ(a);
                 break;
             case EOR_ZPX:
-                setNZ(a ^= memory.readByte((fetch() + x) & BYTE_MASK));
+                a ^= memory.readByte((fetch() + x) & BYTE_MASK);
+                setNZ(a);
                 break;
             case EOR_ABY:
-                setNZ(a ^= memory.readByte(absrd(y)));
+                a ^= memory.readByte(absrd(y));
+                setNZ(a);
                 break;
             case EOR_ABX:
-                setNZ(a ^= memory.readByte(absrd(x)));
+                a ^= memory.readByte(absrd(x));
+                setNZ(a);
                 break;
             case PLA:
                 a = pop();
@@ -373,7 +403,7 @@ public class MOS6502 extends AbstractCPU
      */
     private int fetchShort()
     {
-        return fetch() | fetch() << 8;
+        return fetch() | fetch() << SHIFT_8BITS;
     }
 
     /*
@@ -384,7 +414,7 @@ public class MOS6502 extends AbstractCPU
      */
     private void push(short value)
     {
-        memory.writeByte(0x0100 + sp, value);
+        memory.writeByte(STACK_ADDRESS + sp, value);
         sp = (short) ((sp - 1) & BYTE_MASK);
     }
 
@@ -396,7 +426,7 @@ public class MOS6502 extends AbstractCPU
      */
     private void pushShort(int value)
     {
-        push((short) (value >> 8));
+        push((short) (value >> SHIFT_8BITS));
         push((short) value);
     }
 
@@ -408,7 +438,7 @@ public class MOS6502 extends AbstractCPU
      */
     private short pop()
     {
-        short value = memory.readByte(0x0100 + sp);
+        short value = memory.readByte(STACK_ADDRESS + sp);
         sp = (short) ((sp + 1) & BYTE_MASK);
         return value;
     }
@@ -436,7 +466,7 @@ public class MOS6502 extends AbstractCPU
     {
         int address = fetchShort();
         int result = (address + offset) & SHORT_MASK;
-        if ((address & 0xFF00) != (result & 0xFF00))
+        if ((address & PAGE_CROSS_TEST) != (result & PAGE_CROSS_TEST))
         {
             // TODO: add one cycle
         }
@@ -453,7 +483,7 @@ public class MOS6502 extends AbstractCPU
     private int indx()
     {
         short zp = (short) ((fetch() + x) & BYTE_MASK);
-        return memory.readByte(zp) | (memory.readByte(zp + 1) & BYTE_MASK) << 8;
+        return memory.readByte(zp) | (memory.readByte(zp + 1) & BYTE_MASK) << SHIFT_8BITS;
     }
 
     /*
@@ -465,10 +495,10 @@ public class MOS6502 extends AbstractCPU
     private int indyrd()
     {
         int zp = fetch();
-        int address = memory.readByte(zp) | memory.readByte((zp + 1) & BYTE_MASK) << 8;
-        zp = address & 0xFF00;
+        int address = memory.readByte(zp) | memory.readByte((zp + 1) & BYTE_MASK) << SHIFT_8BITS;
+        zp = address & PAGE_CROSS_TEST;
         address = (address + y) & SHORT_MASK;
-        if ((address & 0xFF00) != zp)
+        if ((address & PAGE_CROSS_TEST) != zp)
         {
             // TODO: add one cycle
         }
@@ -485,7 +515,7 @@ public class MOS6502 extends AbstractCPU
     private int indywr()
     {
         int zp = fetch();
-        int address = memory.readByte(zp) | memory.readByte((zp + 1) & BYTE_MASK) << 8;
+        int address = memory.readByte(zp) | memory.readByte((zp + 1) & BYTE_MASK) << SHIFT_8BITS;
         address = (address + y) & SHORT_MASK;
 
         return address;
@@ -493,7 +523,7 @@ public class MOS6502 extends AbstractCPU
 
     private int readShort(int address)
     {
-        return memory.readByte(address) | (memory.readByte((address + 1) & SHORT_MASK) << 8);
+        return memory.readByte(address) | (memory.readByte((address + 1) & SHORT_MASK) << SHIFT_8BITS);
     }
 
     public short getA()

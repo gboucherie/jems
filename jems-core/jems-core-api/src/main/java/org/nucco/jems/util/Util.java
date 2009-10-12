@@ -1,6 +1,6 @@
 package org.nucco.jems.util;
 
-public class Util
+public final class Util
 {
 
     protected static final String HEX_CHARS = "0123456789ABCDEF";

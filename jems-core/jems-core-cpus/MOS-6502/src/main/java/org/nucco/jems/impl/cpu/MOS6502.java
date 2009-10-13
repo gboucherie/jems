@@ -17,7 +17,7 @@ public class MOS6502 extends AbstractCPU
     protected static final byte[] CYCLES = {
         7, 6, 0, 0, 0, 3, 0, 0, 3, 2, 0, 0, 0, 4, 0, 0, // 00 .. 0F
         0, 5, 0, 0, 0, 4, 0, 0, 0, 4, 0, 0, 0, 4, 0, 0, // 10 .. 1F
-        0, 6, 0, 0, 0, 3, 0, 0, 4, 2, 0, 0, 0, 4, 0, 0, // 20 .. 2F
+        0, 6, 0, 0, 3, 3, 0, 0, 4, 2, 0, 0, 4, 4, 0, 0, // 20 .. 2F
         0, 5, 0, 0, 0, 4, 0, 0, 0, 4, 0, 0, 0, 4, 0, 0, // 30 .. 3F
         0, 6, 0, 0, 0, 3, 0, 0, 3, 2, 0, 0, 0, 4, 0, 0, // 40 .. 4F
         0, 5, 0, 0, 0, 4, 0, 0, 0, 4, 0, 0, 0, 4, 0, 0, // 50 .. 5F
@@ -42,6 +42,8 @@ public class MOS6502 extends AbstractCPU
     protected static final short B_FLAG = 0x10; // Break [0 on stk after int]
     protected static final short V_FLAG = 0x40; // 1: Overflow occured
     protected static final short N_FLAG = 0x80; // 1: Result is negative
+
+    protected static final int BIT_MASK = ~(N_FLAG | V_FLAG | Z_FLAG);
 
     // =============================================================
     // Indicates which values are negative or zero
@@ -152,6 +154,9 @@ public class MOS6502 extends AbstractCPU
                 a &= memory.readByte(indx());
                 setNZ(a);
                 break;
+            case BIT_ZP:
+                bit(fetch());
+                break;
             case AND_ZP:
                 a &= memory.readByte(fetch());
                 setNZ(a);
@@ -160,7 +165,11 @@ public class MOS6502 extends AbstractCPU
                 sr = pop();
                 break;
             case AND_IMM:
-                setNZ(a &= fetch());
+                a &= fetch();
+                setNZ(a);
+                break;
+            case BIT_ABS:
+                bit(fetchShort());
                 break;
             case AND_ABS:
                 a &= memory.readByte(fetchShort());
@@ -526,6 +535,16 @@ public class MOS6502 extends AbstractCPU
         return memory.readByte(address) | (memory.readByte((address + 1) & SHORT_MASK) << SHIFT_8BITS);
     }
 
+    private void bit(int address)
+    {
+        short value = memory.readByte(address);
+        if ((a & value) == 0)
+        {
+            sr |= Z_FLAG;
+        }
+        sr |= (value & (N_FLAG | V_FLAG));
+    }
+
     public short getA()
     {
         return a;
@@ -701,6 +720,9 @@ public class MOS6502 extends AbstractCPU
     private static final short ORA_ABY = 0x19;
     private static final short ORA_IZX = 0x01;
     private static final short ORA_IZY = 0x11;
+
+    private static final short BIT_ZP = 0x24;
+    private static final short BIT_ABS = 0x2C;
 
 
     // Increments & Decrements

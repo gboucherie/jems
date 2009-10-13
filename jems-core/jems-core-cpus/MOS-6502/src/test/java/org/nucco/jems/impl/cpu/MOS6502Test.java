@@ -255,6 +255,69 @@ public class MOS6502Test extends AbstractMOS6502Test
     }
 
     @Test
+    public void test_BIT_ZeroPage_Zero()
+    {
+        MOS6502State expected = new MOS6502State((short) 0xC2, (short) 0xFF, (short) 0xFF, (short) 0xFF, (short) 0x02, (int) 0x0002);
+        cpu.setA((short) 0xC2);
+        cpu.setSR((short) 0x00);
+        test_ZeroPage_read((short) 0x24, (byte) 3, expected, (short) 0x2C);
+    }
+
+    @Test
+    public void test_BIT_ZeroPage_Overflow()
+    {
+        MOS6502State expected = new MOS6502State((short) 0xAC, (short) 0xFF, (short) 0xFF, (short) 0xFF, (short) 0x40, (int) 0x0002);
+        cpu.setA((short) 0xAC);
+        cpu.setSR((short) 0x00);
+        test_ZeroPage_read((short) 0x24, (byte) 3, expected, (short) 0x5D);
+    }
+
+    @Test
+    public void test_BIT_ZeroPage_Negative()
+    {
+        MOS6502State expected = new MOS6502State((short) 0x84, (short) 0xFF, (short) 0xFF, (short) 0xFF, (short) 0x80, (int) 0x0002);
+        cpu.setA((short) 0x84);
+        cpu.setSR((short) 0x00);
+        test_ZeroPage_read((short) 0x24, (byte) 3, expected, (short) 0x80);
+    }
+
+    @Test
+    public void test_BIT_ZeroPage_ZeroAndOverflow()
+    {
+        MOS6502State expected = new MOS6502State((short) 0xA2, (short) 0xFF, (short) 0xFF, (short) 0xFF, (short) 0x42, (int) 0x0002);
+        cpu.setA((short) 0xA2);
+        cpu.setSR((short) 0x00);
+        test_ZeroPage_read((short) 0x24, (byte) 3, expected, (short) 0x5D);
+    }
+
+    @Test
+    public void test_BIT_ZeroPage_ZeroAndNegative()
+    {
+        MOS6502State expected = new MOS6502State((short) 0x7F, (short) 0xFF, (short) 0xFF, (short) 0xFF, (short) 0x82, (int) 0x0002);
+        cpu.setA((short) 0x7F);
+        cpu.setSR((short) 0x00);
+        test_ZeroPage_read((short) 0x24, (byte) 3, expected, (short) 0x80);
+    }
+
+    @Test
+    public void test_BIT_ZeroPage_OverflowAndNegative()
+    {
+        MOS6502State expected = new MOS6502State((short) 0x3F, (short) 0xFF, (short) 0xFF, (short) 0xFF, (short) 0xC0, (int) 0x0002);
+        cpu.setA((short) 0x3F);
+        cpu.setSR((short) 0x00);
+        test_ZeroPage_read((short) 0x24, (byte) 3, expected, (short) 0xCF);
+    }
+
+    @Test
+    public void test_BIT_ZeroPage_ZeroAndOverflowAndNegative()
+    {
+        MOS6502State expected = new MOS6502State((short) 0x30, (short) 0xFF, (short) 0xFF, (short) 0xFF, (short) 0xC2, (int) 0x0002);
+        cpu.setA((short) 0x30);
+        cpu.setSR((short) 0x00);
+        test_ZeroPage_read((short) 0x24, (byte) 3, expected, (short) 0xCF);
+    }
+
+    @Test
     public void test_AND_ZeroPage_Positive()
     {
         MOS6502State expected = new MOS6502State((short) 0x08, (short) 0xFF, (short) 0xFF, (short) 0xFF, (short) 0x7D, (int) 0x0002);
@@ -310,6 +373,69 @@ public class MOS6502Test extends AbstractMOS6502Test
         MOS6502State expected = new MOS6502State((short) 0x98, (short) 0xFF, (short) 0xFF, (short) 0xFF, (short) 0xFD, (int) 0x0002);
         cpu.setA((short) 0x98);
         test_Immediate_read((short) 0x29, (byte) 2, expected, (short) 0xFF);
+    }
+
+    @Test
+    public void test_BIT_Absolute_Zero()
+    {
+        MOS6502State expected = new MOS6502State((short) 0xC2, (short) 0xFF, (short) 0xFF, (short) 0xFF, (short) 0x02, (int) 0x0003);
+        cpu.setA((short) 0xC2);
+        cpu.setSR((short) 0x00);
+        test_Absolute_read((short) 0x2C, (byte) 4, expected, (short) 0x2C);
+    }
+
+    @Test
+    public void test_BIT_Absolute_Overflow()
+    {
+        MOS6502State expected = new MOS6502State((short) 0xAC, (short) 0xFF, (short) 0xFF, (short) 0xFF, (short) 0x40, (int) 0x0003);
+        cpu.setA((short) 0xAC);
+        cpu.setSR((short) 0x00);
+        test_Absolute_read((short) 0x2C, (byte) 4, expected, (short) 0x5D);
+    }
+
+    @Test
+    public void test_BIT_Absolute_Negative()
+    {
+        MOS6502State expected = new MOS6502State((short) 0x84, (short) 0xFF, (short) 0xFF, (short) 0xFF, (short) 0x80, (int) 0x0003);
+        cpu.setA((short) 0x84);
+        cpu.setSR((short) 0x00);
+        test_Absolute_read((short) 0x2C, (byte) 4, expected, (short) 0x80);
+    }
+
+    @Test
+    public void test_BIT_Absolute_ZeroAndOverflow()
+    {
+        MOS6502State expected = new MOS6502State((short) 0xA2, (short) 0xFF, (short) 0xFF, (short) 0xFF, (short) 0x42, (int) 0x0003);
+        cpu.setA((short) 0xA2);
+        cpu.setSR((short) 0x00);
+        test_Absolute_read((short) 0x2C, (byte) 4, expected, (short) 0x5D);
+    }
+
+    @Test
+    public void test_BIT_Absolute_ZeroAndNegative()
+    {
+        MOS6502State expected = new MOS6502State((short) 0x7F, (short) 0xFF, (short) 0xFF, (short) 0xFF, (short) 0x82, (int) 0x0003);
+        cpu.setA((short) 0x7F);
+        cpu.setSR((short) 0x00);
+        test_Absolute_read((short) 0x2C, (byte) 4, expected, (short) 0x80);
+    }
+
+    @Test
+    public void test_BIT_Absolute_OverflowAndNegative()
+    {
+        MOS6502State expected = new MOS6502State((short) 0x3F, (short) 0xFF, (short) 0xFF, (short) 0xFF, (short) 0xC0, (int) 0x0003);
+        cpu.setA((short) 0x3F);
+        cpu.setSR((short) 0x00);
+        test_Absolute_read((short) 0x2C, (byte) 4, expected, (short) 0xCF);
+    }
+
+    @Test
+    public void test_BIT_Absolute_ZeroAndOverflowAndNegative()
+    {
+        MOS6502State expected = new MOS6502State((short) 0x30, (short) 0xFF, (short) 0xFF, (short) 0xFF, (short) 0xC2, (int) 0x0003);
+        cpu.setA((short) 0x30);
+        cpu.setSR((short) 0x00);
+        test_Absolute_read((short) 0x2C, (byte) 4, expected, (short) 0xCF);
     }
 
     @Test

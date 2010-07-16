@@ -1845,10 +1845,13 @@ public class MOS6502Test extends AbstractMOS6502Test
     @Test
     public void test_JSR()
     {
-        MOS6502State expected = new MOS6502State((short) 0xFF, (short) 0xFF, (short) 0xFF, (short) 0xFD, (short) 0xFF, (int) 0x7802);
+        MOS6502State expected = new MOS6502State((short) 0xFF, (short) 0xFF, (short) 0xFF, (short) 0xFD, (short) 0xFF, (int) 0xF1E4);
         EasyMock.expect(memory.readByte(0x0000)).andReturn((short) 0x20);
-        memory.writeByte(0x01FF, (short) 0xFF);
-        memory.writeByte(0x01FE, (short) 0xFF);
+        EasyMock.expect(memory.readByte(0x0001)).andReturn((short) 0xE4);
+        EasyMock.expect(memory.readByte(0x0002)).andReturn((short) 0xF1);
+        memory.writeByte(0x01FF, (short) 0x00);
+        memory.writeByte(0x01FE, (short) 0x02);
+        test((short) 0x20, (byte) 6, expected);
     }
 
 }

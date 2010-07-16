@@ -17,7 +17,7 @@ public class MOS6502 extends AbstractCPU
     protected static final byte[] CYCLES = {
         7, 6, 0, 0, 0, 3, 0, 0, 3, 2, 0, 0, 0, 4, 0, 0, // 00 .. 0F
         0, 5, 0, 0, 0, 4, 0, 0, 0, 4, 0, 0, 0, 4, 0, 0, // 10 .. 1F
-        0, 6, 0, 0, 3, 3, 0, 0, 4, 2, 0, 0, 4, 4, 0, 0, // 20 .. 2F
+        6, 6, 0, 0, 3, 3, 0, 0, 4, 2, 0, 0, 4, 4, 0, 0, // 20 .. 2F
         0, 5, 0, 0, 0, 4, 0, 0, 0, 4, 0, 0, 0, 4, 0, 0, // 30 .. 3F
         0, 6, 0, 0, 0, 3, 0, 0, 3, 2, 0, 0, 3, 4, 0, 0, // 40 .. 4F
         0, 5, 0, 0, 0, 4, 0, 0, 0, 4, 0, 0, 0, 4, 0, 0, // 50 .. 5F
@@ -152,6 +152,11 @@ public class MOS6502 extends AbstractCPU
             case ORA_ABX:
                 a |= memory.readByte(absrd(x));
                 setNZ(a);
+                break;
+            case JSR:
+                address = fetchShort();
+                pushShort((pc - 1) & SHORT_MASK);
+                pc = address;
                 break;
             case AND_IZX:
                 a &= memory.readByte(indx());
@@ -804,6 +809,8 @@ public class MOS6502 extends AbstractCPU
     // Jumps & Calls
     private static final short JMP_ABS = 0x4C;
     private static final short JMP_IND = 0x6C;
+
+    private static final short JSR = 0x20;
 
 
     // System Functions

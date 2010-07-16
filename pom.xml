@@ -35,7 +35,7 @@
     <repository>
       <id>internal-release</id>
       <name>internal-release</name>
-      <url>http://guima/nexus/content/repositories/internal-release/</url>
+      <url>http://localhost/nexus/content/repositories/internal-release/</url>
       <snapshots>
         <enabled>false</enabled>
       </snapshots>

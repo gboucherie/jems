@@ -19,18 +19,18 @@ public class MOS6502 extends AbstractCPU
         0, 5, 0, 0, 0, 4, 0, 0, 0, 4, 0, 0, 0, 4, 0, 0, // 10 .. 1F
         0, 6, 0, 0, 3, 3, 0, 0, 4, 2, 0, 0, 4, 4, 0, 0, // 20 .. 2F
         0, 5, 0, 0, 0, 4, 0, 0, 0, 4, 0, 0, 0, 4, 0, 0, // 30 .. 3F
-        0, 6, 0, 0, 0, 3, 0, 0, 3, 2, 0, 0, 0, 4, 0, 0, // 40 .. 4F
+        0, 6, 0, 0, 0, 3, 0, 0, 3, 2, 0, 0, 3, 4, 0, 0, // 40 .. 4F
         0, 5, 0, 0, 0, 4, 0, 0, 0, 4, 0, 0, 0, 4, 0, 0, // 50 .. 5F
-        0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, // 60 .. 6F
+        0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 5, 0, 0, 0, // 60 .. 6F
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 70 .. 7F
         0, 6, 0, 0, 3, 3, 3, 0, 2, 0, 2, 0, 4, 4, 4, 0, // 80 .. 8F
         0, 6, 0, 0, 4, 4, 4, 0, 2, 5, 2, 0, 0, 5, 0, 0, // 90 .. 9F
         2, 6, 2, 0, 3, 3, 3, 0, 2, 2, 2, 0, 4, 4, 4, 0, // A0 .. AF
         0, 5, 0, 0, 4, 4, 4, 0, 0, 4, 2, 0, 4, 4, 4, 0, // B0 .. BF
-        0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 2, 0, 0, 0, 0, 0, // C0 .. CF
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // D0 .. DF
-        0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 2, 0, 0, 0, 0, 0, // E0 .. EF
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 // F0 .. FF
+        0, 0, 0, 0, 0, 0, 5, 0, 2, 0, 2, 0, 0, 0, 6, 0, // C0 .. CF
+        0, 0, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 7, 0, // D0 .. DF
+        0, 0, 0, 0, 0, 0, 5, 0, 2, 0, 2, 0, 0, 0, 6, 0, // E0 .. EF
+        0, 0, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 7, 0  // F0 .. FF
     // ,0, 1, 2, 3, 4, 5, 6, 7, 8, 9, A, B, C, D, E, F
     };
 
@@ -107,6 +107,9 @@ public class MOS6502 extends AbstractCPU
      */
     private void step(short opcode)
     {
+        int address = 0;
+        short value = 0;
+
         switch (opcode)
         {
             case BRK:
@@ -206,6 +209,9 @@ public class MOS6502 extends AbstractCPU
                 a ^= fetch();
                 setNZ(a);
                 break;
+            case JMP_ABS:
+                pc = fetchShort();
+                break;
             case EOR_ABS:
                 a ^= memory.readByte(fetchShort());
                 setNZ(a);
@@ -229,6 +235,10 @@ public class MOS6502 extends AbstractCPU
             case PLA:
                 a = pop();
                 setNZ(a);
+                break;
+            case JMP_IND:
+                address = fetchShort();
+                pc = memory.readByte(address) | memory.readByte((address + 1) & SHORT_MASK) << SHIFT_8BITS;
                 break;
             case STA_IZX:
                 memory.writeByte(indx(), a);
@@ -368,6 +378,12 @@ public class MOS6502 extends AbstractCPU
                 x = memory.readByte((fetch() + y) & BYTE_MASK);
                 setNZ(x);
                 break;
+            case DEC_ZP:
+                address = fetch();
+                value = (short) ((memory.readByte(address) - 1) & BYTE_MASK);
+                memory.writeByte(address, value);
+                setNZ(value);
+                break;
             case INY:
                 y = (short) ((y + 1) & BYTE_MASK);
                 setNZ(y);
@@ -376,11 +392,53 @@ public class MOS6502 extends AbstractCPU
                 x = (short) ((x - 1) & BYTE_MASK);
                 setNZ(x);
                 break;
+            case DEC_ABS:
+                address = fetchShort();
+                value = (short) ((memory.readByte(address) - 1) & BYTE_MASK);
+                memory.writeByte(address, value);
+                setNZ(value);
+                break;
+            case DEC_ZPX:
+                address = (fetch() + x) & BYTE_MASK;
+                value = (short) ((memory.readByte(address) - 1) & BYTE_MASK);
+                memory.writeByte(address, value);
+                setNZ(value);
+                break;
+            case DEC_ABX:
+                address = (fetchShort() + x) & SHORT_MASK;
+                value = (short) ((memory.readByte(address) - 1) & BYTE_MASK);
+                memory.writeByte(address, value);
+                setNZ(value);
+                break;
+            case INC_ZP:
+                address = fetch();
+                value = (short) ((memory.readByte(address) + 1) & BYTE_MASK);
+                memory.writeByte(address, value);
+                setNZ(value);
+                break;
             case INX:
                 x = (short) ((x + 1) & BYTE_MASK);
                 setNZ(x);
                 break;
             case NOP:
+                break;
+            case INC_ABS:
+                address = fetchShort();
+                value = (short) ((memory.readByte(address) + 1) & BYTE_MASK);
+                memory.writeByte(address, value);
+                setNZ(value);
+                break;
+            case INC_ZPX:
+                address = (fetch() + x) & BYTE_MASK;
+                value = (short) ((memory.readByte(address) + 1) & BYTE_MASK);
+                memory.writeByte(address, value);
+                setNZ(value);
+                break;
+            case INC_ABX:
+                address = (fetchShort() + x) & SHORT_MASK;
+                value = (short) ((memory.readByte(address) + 1) & BYTE_MASK);
+                memory.writeByte(address, value);
+                setNZ(value);
                 break;
 
             default:
@@ -442,8 +500,6 @@ public class MOS6502 extends AbstractCPU
     /*
      * (non-Javadoc) Pop a 8bits value from the stack and increment one the
      * stack register.
-     * 
-     * @param value the 16bits value to push on the stack
      */
     private short pop()
     {
@@ -632,7 +688,7 @@ public class MOS6502 extends AbstractCPU
 
     // Load/Store Operations
     private static final short LDA_IMM = 0xA9;
-    private static final short LDA_ZP = 0xA5;
+    private static final short LDA_ZP  = 0xA5;
     private static final short LDA_ZPX = 0xB5;
     private static final short LDA_ABS = 0xAD;
     private static final short LDA_ABX = 0xBD;
@@ -641,18 +697,18 @@ public class MOS6502 extends AbstractCPU
     private static final short LDA_IZY = 0xB1;
 
     private static final short LDX_IMM = 0xA2;
-    private static final short LDX_ZP = 0xA6;
+    private static final short LDX_ZP  = 0xA6;
     private static final short LDX_ZPY = 0xB6;
     private static final short LDX_ABS = 0xAE;
     private static final short LDX_ABY = 0xBE;
 
     private static final short LDY_IMM = 0xA0;
-    private static final short LDY_ZP = 0xA4;
+    private static final short LDY_ZP  = 0xA4;
     private static final short LDY_ZPX = 0xB4;
     private static final short LDY_ABS = 0xAC;
     private static final short LDY_ABX = 0xBC;
 
-    private static final short STA_ZP = 0x85;
+    private static final short STA_ZP  = 0x85;
     private static final short STA_ZPX = 0x95;
     private static final short STA_ABS = 0x8D;
     private static final short STA_ABX = 0x9D;
@@ -660,11 +716,11 @@ public class MOS6502 extends AbstractCPU
     private static final short STA_IZX = 0x81;
     private static final short STA_IZY = 0x91;
 
-    private static final short STX_ZP = 0x86;
+    private static final short STX_ZP  = 0x86;
     private static final short STX_ZPY = 0x96;
     private static final short STX_ABS = 0x8E;
 
-    private static final short STY_ZP = 0x84;
+    private static final short STY_ZP  = 0x84;
     private static final short STY_ZPX = 0x94;
     private static final short STY_ABS = 0x8C;
 
@@ -695,7 +751,7 @@ public class MOS6502 extends AbstractCPU
 
     //Logical
     private static final short AND_IMM = 0x29;
-    private static final short AND_ZP = 0x25;
+    private static final short AND_ZP  = 0x25;
     private static final short AND_ZPX = 0x35;
     private static final short AND_ABS = 0x2D;
     private static final short AND_ABX = 0x3D;
@@ -704,7 +760,7 @@ public class MOS6502 extends AbstractCPU
     private static final short AND_IZY = 0x31;
 
     private static final short EOR_IMM = 0x49;
-    private static final short EOR_ZP = 0x45;
+    private static final short EOR_ZP  = 0x45;
     private static final short EOR_ZPX = 0x55;
     private static final short EOR_ABS = 0x4D;
     private static final short EOR_ABX = 0x5D;
@@ -713,7 +769,7 @@ public class MOS6502 extends AbstractCPU
     private static final short EOR_IZY = 0x51;
 
     private static final short ORA_IMM = 0x09;
-    private static final short ORA_ZP = 0x05;
+    private static final short ORA_ZP  = 0x05;
     private static final short ORA_ZPX = 0x15;
     private static final short ORA_ABS = 0x0D;
     private static final short ORA_ABX = 0x1D;
@@ -721,18 +777,33 @@ public class MOS6502 extends AbstractCPU
     private static final short ORA_IZX = 0x01;
     private static final short ORA_IZY = 0x11;
 
-    private static final short BIT_ZP = 0x24;
+    private static final short BIT_ZP  = 0x24;
     private static final short BIT_ABS = 0x2C;
 
 
     // Increments & Decrements
+    private static final short INC_ZP  = 0xE6;
+    private static final short INC_ZPX = 0xF6;
+    private static final short INC_ABS = 0xEE;
+    private static final short INC_ABX = 0xFE;
+
     private static final short INX = 0xE8;
 
     private static final short INY = 0xC8;
 
+    private static final short DEC_ZP  = 0xC6;
+    private static final short DEC_ZPX = 0xD6;
+    private static final short DEC_ABS = 0xCE;
+    private static final short DEC_ABX = 0xDE;
+
     private static final short DEX = 0xCA;
 
     private static final short DEY = 0x88;
+
+
+    // Jumps & Calls
+    private static final short JMP_ABS = 0x4C;
+    private static final short JMP_IND = 0x6C;
 
 
     // System Functions

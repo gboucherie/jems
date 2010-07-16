@@ -1854,4 +1854,15 @@ public class MOS6502Test extends AbstractMOS6502Test
         test((short) 0x20, (byte) 6, expected);
     }
 
+    @Test
+    public void test_RTS()
+    {
+        MOS6502State expected = new MOS6502State((short) 0xFF, (short) 0xFF, (short) 0xFF, (short) 0xC9, (short) 0xFF, (int) 0xF1E5);
+        cpu.setSP((short) 0xC7);
+        EasyMock.expect(memory.readByte(0x0000)).andReturn((short) 0x60);
+        EasyMock.expect(memory.readByte(0x01C7)).andReturn((short) 0xE4);
+        EasyMock.expect(memory.readByte(0x01C8)).andReturn((short) 0xF1);
+        test((short) 0x60, (byte) 6, expected);
+    }
+
 }

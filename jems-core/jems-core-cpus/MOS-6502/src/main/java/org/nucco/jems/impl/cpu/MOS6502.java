@@ -21,7 +21,7 @@ public class MOS6502 extends AbstractCPU
         0, 5, 0, 0, 0, 4, 0, 0, 0, 4, 0, 0, 0, 4, 0, 0, // 30 .. 3F
         0, 6, 0, 0, 0, 3, 0, 0, 3, 2, 0, 0, 3, 4, 0, 0, // 40 .. 4F
         0, 5, 0, 0, 0, 4, 0, 0, 0, 4, 0, 0, 0, 4, 0, 0, // 50 .. 5F
-        0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 5, 0, 0, 0, // 60 .. 6F
+        6, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 5, 0, 0, 0, // 60 .. 6F
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 70 .. 7F
         0, 6, 0, 0, 3, 3, 3, 0, 2, 0, 2, 0, 4, 4, 4, 0, // 80 .. 8F
         0, 6, 0, 0, 4, 4, 4, 0, 2, 5, 2, 0, 0, 5, 0, 0, // 90 .. 9F
@@ -236,6 +236,9 @@ public class MOS6502 extends AbstractCPU
             case EOR_ABX:
                 a ^= memory.readByte(absrd(x));
                 setNZ(a);
+                break;
+            case RTS:
+                pc = (popShort() + 1) & SHORT_MASK;
                 break;
             case PLA:
                 a = pop();
@@ -511,6 +514,15 @@ public class MOS6502 extends AbstractCPU
         short value = memory.readByte(STACK_ADDRESS + sp);
         sp = (short) ((sp + 1) & BYTE_MASK);
         return value;
+    }
+
+    /*
+     * (non-Javadoc) Pop a 16bits value from the stack and increment twice the
+     * stack register.
+     */
+    private int popShort()
+    {
+        return pop() | pop() << SHIFT_8BITS;
     }
 
     /*
@@ -811,6 +823,8 @@ public class MOS6502 extends AbstractCPU
     private static final short JMP_IND = 0x6C;
 
     private static final short JSR = 0x20;
+
+    private static final short RTS = 0x60;
 
 
     // System Functions
